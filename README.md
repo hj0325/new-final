@@ -23,3 +23,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - `pages/`: Contains the Next.js pages. `pages/index.js` is the main page that renders the 3D scene.
 - `public/`: Store your static assets here, such as your `.gltf` models (e.g., `Body.gltf`, `Wings.gltf`).
 - `package.json`: Lists project dependencies and scripts.
+# new-final
