@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-spring/three": "^9.7.5",
     "@react-three/drei": "^10.0.7",
     "@react-three/fiber": "^9.1.2",
     "next": "latest",
