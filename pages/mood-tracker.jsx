@@ -142,6 +142,8 @@ function ScaledScene(props) {
         onHover={props.onHover} // 호버 이벤트 핸들러 (mood-tracker.jsx 고유 기능)
         bodyProps={props.bodyProps} // 저울 본체 스타일 및 위치 props
         wingsProps={props.wingsProps} // 저울 날개 스타일 및 위치 props
+        wingsLeftProps={{ position: [-0, 0, 0], scale: 1, rotation: [0, 0, 0] }}
+        wingsRightProps={{ position: [0, 0, 0], scale: 1, rotation: [0, 0, 0] }}
         wingsPrimitiveOffset={props.wingsPrimitiveOffset} // 날개 내부 요소 오프셋 props
         tiltAngle={props.tiltAngle} // 저울 기울기 각도 props
         verticalMovementFactor={props.verticalMovementFactor} // 저울 수직 움직임 계수 props
