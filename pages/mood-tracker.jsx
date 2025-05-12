@@ -31,15 +31,18 @@ const FullScreenContainer = ({ children }) => (
 );
 
 // --- UI 컴포넌트: 하단 이모티콘 선택 바 ---
-// IconBarPlaceholder: onEmojiSelect prop 추가 (이모티콘 클릭 시 호출될 함수)
 const IconBarPlaceholder = ({ onEmojiSelect }) => {
   const emojis = ['😀', '😮', '😐', '😖', '😠']; 
   return (
     <div style={{
       position: 'absolute',
       bottom: '7vh',
+      left: 0,
+      width: '100%',
       display: 'flex',
-      gap: '30px', 
+      justifyContent: 'center',
+      gap: '30px',
+      zIndex: 20,
     }}>
       {emojis.map((emoji, index) => (
         <div key={index} style={{
@@ -47,8 +50,8 @@ const IconBarPlaceholder = ({ onEmojiSelect }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          cursor: 'pointer', // 클릭 가능하도록 커서 변경
-        }} onClick={() => onEmojiSelect(emoji)}> {/* 클릭 시 onEmojiSelect 호출 */}
+          cursor: 'pointer',
+        }} onClick={() => onEmojiSelect(emoji)}>
           {emoji}
         </div>
       ))}
@@ -152,6 +155,103 @@ function ScaledScene(props) {
   );
 }
 
+// --- 감정 컬럼(프레임) 컴포넌트 ---
+function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSliderChange, buttonText = '만들기 시작' }) {
+  return (
+    <div style={{
+      width: 260,
+      minWidth: 220,
+      background: '#B02B3A',
+      borderRadius: 30,
+      padding: '24px 12px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 24,
+      boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+    }}>
+      {/* 상단 텍스트 */}
+      <div style={{
+        width: '100%',
+        background: '#D2F2E9',
+        color: '#222',
+        fontWeight: 700,
+        fontSize: 22,
+        borderRadius: 12,
+        textAlign: 'center',
+        padding: '8px 0',
+        marginBottom: 8
+      }}>감정 무게</div>
+      {/* 이모티콘+슬라이더 카드 */}
+      <div style={{
+        width: '90%',
+        background: 'white',
+        borderRadius: 18,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '18px 0 18px 0',
+        marginBottom: 8
+      }}>
+        <div style={{ fontSize: 60, marginBottom: 10 }}>{emoji}</div>
+        {/* 슬라이더바 (시각적 placeholder) */}
+        <div style={{ width: '80%', height: 18, background: '#BFE2D6', borderRadius: 9, position: 'relative', margin: '10px 0' }}>
+          <div style={{
+            position: 'absolute',
+            left: `calc(${sliderValue}% - 18px)`,
+            top: -7,
+            width: 32,
+            height: 32,
+            background: '#E94B5A',
+            borderRadius: '50%',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.13)',
+            border: '3px solid #fff',
+            transition: 'left 0.2s'
+          }} />
+        </div>
+      </div>
+      {/* 감정 배워보기 카드 */}
+      <div style={{
+        width: '90%',
+        background: 'white',
+        borderRadius: 18,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+        padding: '16px 10px',
+        marginBottom: 8,
+        fontSize: 18,
+        color: '#222',
+        textAlign: 'left',
+        minHeight: 90,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4
+      }}>
+        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 배워보기</div>
+        <div>
+          {keywords.map((k, i) => (
+            <span key={i} style={{ marginRight: 8 }}>{k}</span>
+          ))}
+        </div>
+      </div>
+      {/* 하단 버튼 */}
+      <button style={{
+        width: '90%',
+        background: 'white',
+        color: '#B02B3A',
+        border: 'none',
+        borderRadius: 18,
+        fontWeight: 700,
+        fontSize: 20,
+        padding: '12px 0',
+        marginTop: 8,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+        cursor: 'pointer'
+      }}>{buttonText}</button>
+    </div>
+  );
+}
+
 // --- 메인 페이지 컴포넌트: MoodTrackerPage ---
 export default function MoodTrackerPage() {
   // --- 상태 관리 ---
@@ -178,21 +278,28 @@ export default function MoodTrackerPage() {
     setSelectedEmojiForGame(null);
   };
 
-  // --- 렌더링 ---
+  // 예시 키워드 (이미지 참고)
+  const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
+
   return (
     <FullScreenContainer>
-      {/* 3D 캔버스 영역 */}
-      <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative' }}>
-        {/* 카메라 위치(y, z) 수정하여 더 높은 탑다운 뷰로 변경 */}
+      {/* 양쪽 컬럼 프레임 추가: flex row로 배치 */}
+      <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+        {/* 왼쪽 컬럼 */}
+        <EmotionColumn emoji="😀" keywords={keywords} sliderValue={30} buttonText="만들기 시작" />
+        {/* 오른쪽 컬럼 */}
+        <EmotionColumn emoji="😞" keywords={keywords} sliderValue={70} buttonText="만들기 시작" />
+      </div>
+      {/* 기존 3D 캔버스, 하단 이모티콘, 모달 등은 그대로 */}
+      <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
-          <Suspense fallback={null}> {/* 모델 로딩 중 표시할 UI (현재는 없음) */}
-            {/* 조명 설정 */}
+          <Suspense fallback={null}>
             <ambientLight intensity={0.25} color="#FFFFFF" />
             <directionalLight 
               position={[8, 10, 5]} 
               intensity={0.2} 
-              castShadow // 그림자 생성
-              shadow-mapSize-width={1024} // 그림자 맵 해상도
+              castShadow
+              shadow-mapSize-width={1024}
               shadow-mapSize-height={1024}
             />
             <directionalLight 
@@ -200,33 +307,22 @@ export default function MoodTrackerPage() {
               intensity={0.1}
               color="#E3F2FD"
             />
-            {/* 환경 맵 설정 */}
             <Environment preset="sunset" intensity={0.8} blur={0.5} />
-            
-            {/* 저울 3D 씬 렌더링 */}
             <ScaledScene
               isHovered={isHovered}
               onHover={setIsHovered}
               bodyProps={bodyProps}
               wingsProps={wingsProps}
               wingsPrimitiveOffset={wingsPrimitiveOffset}
-              tiltAngle={Math.PI / 20} // 저울 기울기 각도
-              verticalMovementFactor={0.03} // 저울 수직 움직임 계수
+              tiltAngle={Math.PI / 20}
+              verticalMovementFactor={0.03}
             />
-            {/* <OrbitControls /> */} {/* 카메라 컨트롤 (현재 주석 처리) */}
           </Suspense>
         </Canvas>
       </div>
-      
-      {/* 하단 이모티콘 선택 바 렌더링 및 핸들러 전달 */}
+      {/* 하단 이모티콘 바, 모달 등 기존 코드 그대로 */}
       <IconBarPlaceholder onEmojiSelect={handleEmojiSelectForGame} />
-
-      {/* 게임 모달 렌더링 및 관련 상태/핸들러 전달 */}
-      <GameModal 
-        isOpen={isGameModalOpen} 
-        emoji={selectedEmojiForGame} 
-        onClose={closeGameModal} 
-      />
+      <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGame} onClose={closeGameModal} />
     </FullScreenContainer>
   );
 }
