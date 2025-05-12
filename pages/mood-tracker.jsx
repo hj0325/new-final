@@ -161,6 +161,7 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
     <div style={{
       width: 260,
       minWidth: 220,
+      minHeight: '100vh',
       background: '#B02B3A',
       borderRadius: 30,
       padding: '24px 12px',
@@ -179,8 +180,9 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
         fontSize: 22,
         borderRadius: 12,
         textAlign: 'center',
-        padding: '8px 0',
-        marginBottom: 8
+        padding: '10px 0',
+        marginTop: 22, 
+        marginBottom: 1
       }}>감정 무게</div>
       {/* 이모티콘+슬라이더 카드 */}
       <div style={{
@@ -192,7 +194,7 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
         flexDirection: 'column',
         alignItems: 'center',
         padding: '18px 0 18px 0',
-        marginBottom: 8
+        marginBottom: 30
       }}>
         <div style={{ fontSize: 60, marginBottom: 10 }}>{emoji}</div>
         {/* 슬라이더바 (시각적 placeholder) */}
