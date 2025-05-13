@@ -156,7 +156,7 @@ function ScaledScene(props) {
 }
 
 // --- 감정 컬럼(프레임) 컴포넌트 ---
-function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSliderChange, buttonText = '만들기 시작' }) {
+function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSliderChange }) {
   return (
     <div style={{
       width: 260,
@@ -236,20 +236,24 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
           ))}
         </div>
       </div>
-      {/* 하단 버튼 */}
-      <button style={{
-        width: '90%',
-        background: 'white',
-        color: '#B02B3A',
-        border: 'none',
-        borderRadius: 18,
-        fontWeight: 700,
-        fontSize: 20,
-        padding: '12px 0',
-        marginTop: 8,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-        cursor: 'pointer'
-      }}>{buttonText}</button>
+      {/* 하단 버튼: 컬럼 하단에 붙고 가운데 정렬 */}
+      <button
+        style={{
+          width: '90%',
+          background: 'white',
+          color: '#B02B3A',
+          border: 'none',
+          borderRadius: 18,
+          fontWeight: 700,
+          fontSize: 20,
+          padding: '12px 0',
+          marginTop: 'auto',
+          marginBottom: 40,
+          alignSelf: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+          cursor: 'pointer'
+        }}
+      >만들기 시작</button>
     </div>
   );
 }
@@ -288,9 +292,9 @@ export default function MoodTrackerPage() {
       {/* 양쪽 컬럼 프레임 추가: flex row로 배치 */}
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
         {/* 왼쪽 컬럼 */}
-        <EmotionColumn emoji="😀" keywords={keywords} sliderValue={30} buttonText="만들기 시작" />
+        <EmotionColumn emoji="😀" keywords={keywords} sliderValue={30} />
         {/* 오른쪽 컬럼 */}
-        <EmotionColumn emoji="😞" keywords={keywords} sliderValue={70} buttonText="만들기 시작" />
+        <EmotionColumn emoji="😞" keywords={keywords} sliderValue={70} />
       </div>
       {/* 기존 3D 캔버스, 하단 이모티콘, 모달 등은 그대로 */}
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
@@ -322,7 +326,6 @@ export default function MoodTrackerPage() {
           </Suspense>
         </Canvas>
       </div>
-      {/* 하단 이모티콘 바, 모달 등 기존 코드 그대로 */}
       <IconBarPlaceholder onEmojiSelect={handleEmojiSelectForGame} />
       <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGame} onClose={closeGameModal} />
     </FullScreenContainer>
