@@ -236,7 +236,7 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
           ))}
         </div>
       </div>
-      {/* 하단 버튼: 컬럼 하단에 붙고 가운데 정렬 */}
+      <div style={{ flex: 1 }} />
       <button
         style={{
           width: '90%',
@@ -249,7 +249,6 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
           padding: '12px 0',
           marginTop: 'auto',
           marginBottom: 40,
-          alignSelf: 'center',
           boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
           cursor: 'pointer'
         }}
