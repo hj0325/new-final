@@ -1,6 +1,6 @@
 import React, { useState, Suspense } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { OrbitControls, Environment, Text, useGLTF } from '@react-three/drei';
 import Scale from '../components/Scale'; // Scale 컴포넌트 경로 확인 필요
 
 // --- 데이터 정의: 이모티콘별 키워드 ---
@@ -260,6 +260,7 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
 // --- 메인 페이지 컴포넌트: MoodTrackerPage ---
 export default function MoodTrackerPage() {
   // --- 상태 관리 ---
+  const [showLanding, setShowLanding] = useState(true); // 첫 화면 표시 상태 추가
   const [isHovered, setIsHovered] = useState(false); // 마우스 호버 상태 (저울 인터랙션용)
   // 게임 모달 관련 상태
   const [isGameModalOpen, setIsGameModalOpen] = useState(false); // 게임 모달 표시 여부
@@ -283,8 +284,125 @@ export default function MoodTrackerPage() {
     setSelectedEmojiForGame(null);
   };
 
+  // Play 버튼 클릭 핸들러
+  const handlePlayClick = () => {
+    setShowLanding(false);
+  };
+
   // 예시 키워드 (이미지 참고)
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
+
+  // --- 첫 화면 3D 모델 애니메이션 컴포넌트 ---
+  const EMOTION_MODEL_PATHS = [
+    '/models/emotion1.gltf',
+    '/models/emotion2.gltf',
+    '/models/emotion3.gltf',
+    '/models/emotion4.gltf',
+    '/models/emotion5.gltf',
+  ];
+  const MODEL_SCALE = 10; // 모델 크기 (필요시 조정)
+  const FALL_SPEED_MIN = 0.005;
+  const FALL_SPEED_MAX = 0.015;
+
+  // GLTF 모델 미리 로드
+  EMOTION_MODEL_PATHS.forEach(path => useGLTF.preload(path));
+
+  function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight }) {
+    const ref = React.useRef();
+    const { scene } = useGLTF(modelPath);
+    const clonedScene = React.useMemo(() => scene.clone(), [scene]);
+    const [speed] = useState(() => Math.random() * (FALL_SPEED_MAX - FALL_SPEED_MIN) + FALL_SPEED_MIN);
+    const [xPos] = useState(initialX);
+    const [rotationSpeed] = useState(() => (Math.random() - 0.5) * 0.02);
+
+    useFrame((state, delta) => {
+      if (ref.current) {
+        ref.current.position.y -= speed * 60 * delta;
+        ref.current.rotation.y += rotationSpeed * 60 * delta;
+        ref.current.rotation.x += rotationSpeed * 0.5 * 60 * delta;
+
+        // 화면 하단 도달 시 화면 상단으로 리셋
+        if (ref.current.position.y < -viewportHeight / 2 - MODEL_SCALE * 3) { // 모델 크기 고려하여 여유값 추가
+          ref.current.position.y = viewportHeight / 2 + MODEL_SCALE * 3;
+          ref.current.position.x = (Math.random() - 0.5) * state.viewport.width * 0.8; // X 위치 랜덤하게 재설정
+        }
+      }
+    });
+
+    return (
+      <primitive
+        ref={ref}
+        object={clonedScene}
+        scale={MODEL_SCALE}
+        position={[xPos, initialY, 0]}
+      />
+    );
+  }
+
+  function FallingModelsScene() {
+    const { viewport } = useThree();
+    const numModels = EMOTION_MODEL_PATHS.length;
+
+    return (
+      <>
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[0, 10, 10]} intensity={1} />
+        <directionalLight position={[0, -10, -5]} intensity={0.3} />
+        {EMOTION_MODEL_PATHS.map((modelPath, index) => (
+          <FallingEmotionModel
+            key={modelPath} // 경로가 고유하므로 key로 사용
+            modelPath={modelPath}
+            initialX={(Math.random() - 0.5) * viewport.width * 0.8}
+            initialY={viewport.height / 2 + MODEL_SCALE * 2 + index * (viewport.height / numModels) * 0.8} // 시작 Y 위치 분산
+            viewportHeight={viewport.height}
+          />
+        ))}
+      </>
+    );
+  }
+  // --- 첫 화면 3D 모델 애니메이션 컴포넌트 끝 ---
+
+  if (showLanding) {
+    return (
+      <div style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: '#B02B3A', // 양쪽 칼럼 배경색과 동일하게 변경
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
+          <Canvas camera={{ position: [0, 0, 12], fov: 50 }}> {/* 카메라 Z 약간 뒤로 조정 */} 
+            <Suspense fallback={null}>
+              <FallingModelsScene />
+            </Suspense>
+          </Canvas>
+        </div>
+        <button
+          onClick={handlePlayClick}
+          style={{
+            padding: '30px 60px', // 버튼 크기 증가
+            fontSize: '36px',    // 버튼 내 텍스트 크기 증가
+            cursor: 'pointer',
+            background: 'white',
+            color: '#B02B3A',     // 버튼 텍스트 색상 변경
+            border: '3px solid white', // 테두리 두께 증가
+            borderRadius: '15px',  // 모서리 둥글게
+            fontWeight: 'bold',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.3)', // 그림자 강화
+            zIndex: 2, // 다른 요소들 위에 있도록 zIndex 설정
+            position: 'relative' // zIndex 적용을 위해 position 설정
+          }}
+        >
+          Play
+        </button>
+      </div>
+    );
+  }
 
   return (
     <FullScreenContainer>
