@@ -1,6 +1,6 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useRef } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, Text, useGLTF } from '@react-three/drei';
+import { OrbitControls, Environment, Text, useGLTF, OrthographicCamera } from '@react-three/drei';
 import Scale from '../components/Scale'; // Scale 컴포넌트 경로 확인 필요
 
 // --- 데이터 정의: 이모티콘별 키워드 ---
@@ -61,21 +61,20 @@ const IconBarPlaceholder = ({ onEmojiSelect }) => {
 
 // --- UI 컴포넌트: 게임 모달 (이모티콘 클릭 시 표시) ---
 const GameModal = ({ isOpen, emoji, onClose }) => {
-  if (!isOpen || !emoji) return null; // 모달이 열려있지 않거나 이모티콘이 없으면 아무것도 표시 안함
+  if (!isOpen || !emoji) return null;
 
-  const keywords = emojiKeywords[emoji] || ['키워드 정보 없음']; // 선택된 이모티콘에 맞는 키워드 또는 기본 메시지
+  const keywords = emojiKeywords[emoji] || ['키워드 정보 없음'];
 
   return (
-    // 모달 스타일 정의
     <div style={{
-      position: 'fixed', // 화면 중앙 고정을 위해 fixed 사용
+      position: 'fixed',
       top: '48%',
       left: '50%',
-      transform: 'translate(-50%, -50%)', // 정확한 중앙 정렬
-      width: '60vw', // 화면 너비의 60%
-      height: '60vh', // 화면 높이의 60%
-      maxWidth: '600px', // 최대 너비 제한
-      maxHeight: '400px', // 최대 높이 제한
+      transform: 'translate(-50%, -50%)',
+      width: '60vw',
+      height: '60vh',
+      maxWidth: '600px',
+      maxHeight: '400px',
       backgroundColor: 'rgba(255, 255, 255, 0.90)',
       border: '2px solid #eee',
       borderRadius: '10px',
@@ -85,12 +84,11 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'flex-start', 
-      gap: '10px',  // 내부 요소 정렬
-      zIndex: 1000, // 다른 요소들 위에 표시
+      gap: '10px',
+      zIndex: 1000,
     }}>
-      <span style={{ fontSize: '110px' }}>{emoji}</span> {/* 선택된 이모티콘 표시 */}
+      <span style={{ fontSize: '110px' }}>{emoji}</span>
       <h2 style={{ textAlign: 'center', marginTop: '2px', marginBottom: '20px' }}>관련 키워드</h2>
-      {/* 키워드 목록 표시 */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', justifyContent: 'center' }}>
         {keywords.map((keyword, index) => (
           <span key={index} style={{
@@ -103,9 +101,8 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
           </span>
         ))}
       </div>
-      {/* 닫기 버튼 */}
       <button onClick={onClose} style={{
-        marginTop: 'auto', // 버튼을 모달 하단으로 이동
+        marginTop: 'auto',
         padding: '10px 20px',
         fontSize: '16px',
         cursor: 'pointer',
@@ -122,34 +119,31 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
 
 // --- 3D 씬 컴포넌트: 저울 모델 및 크기 조정 로직 ---
 function ScaledScene(props) {
-  const { viewport, size } = useThree(); // 뷰포트 및 캔버스 크기 정보
-  const aspect = size.width / size.height; // 화면 비율 계산
-  let scaleFactor; // 저울 모델의 전체 크기 조절 계수
+  const { viewport, size } = useThree();
+  const aspect = size.width / size.height;
+  let scaleFactor;
 
-  // 화면 비율별 스케일 차등 적용
-  if (aspect > 1) { // 가로가 더 긴 화면
+  if (aspect > 1) {
     scaleFactor = viewport.height / 5.0; 
-  } else { // 세로가 더 길거나 정사각형 화면
+  } else {
     scaleFactor = viewport.height / 6.0; 
   }
 
   return (
-    // 그룹을 사용하여 전체 저울 모델의 크기와 초기 회전 설정
     <group 
       scale={[scaleFactor, scaleFactor, scaleFactor]}
-      rotation={[-Math.PI / 12, 0, 0]} // 저울을 약간 기울여서 시작
+      rotation={[-Math.PI / 12, 0, 0]}
     >
-      {/* 실제 저울 3D 모델 컴포넌트 */}
       <Scale
-        isHovered={props.isHovered} // 마우스 호버 상태 (mood-tracker.jsx 고유 기능으로 여기선 사용 안 함)
-        onHover={props.onHover} // 호버 이벤트 핸들러 (mood-tracker.jsx 고유 기능)
-        bodyProps={props.bodyProps} // 저울 본체 스타일 및 위치 props
-        wingsProps={props.wingsProps} // 저울 날개 스타일 및 위치 props
+        isHovered={props.isHovered}
+        onHover={props.onHover}
+        bodyProps={props.bodyProps}
+        wingsProps={props.wingsProps}
         wingsLeftProps={{ position: [-0, 0, 0], scale: 1, rotation: [0, 0, 0] }}
         wingsRightProps={{ position: [0, 0, 0], scale: 1, rotation: [0, 0, 0] }}
-        wingsPrimitiveOffset={props.wingsPrimitiveOffset} // 날개 내부 요소 오프셋 props
-        tiltAngle={props.tiltAngle} // 저울 기울기 각도 props
-        verticalMovementFactor={props.verticalMovementFactor} // 저울 수직 움직임 계수 props
+        wingsPrimitiveOffset={props.wingsPrimitiveOffset}
+        tiltAngle={props.tiltAngle}
+        verticalMovementFactor={props.verticalMovementFactor}
       />
     </group>
   );
@@ -171,7 +165,6 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
       gap: 24,
       boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
     }}>
-      {/* 상단 텍스트 */}
       <div style={{
         width: '100%',
         background: '#D2F2E9',
@@ -184,7 +177,6 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
         marginTop: 22, 
         marginBottom: 1
       }}>감정 무게</div>
-      {/* 이모티콘+슬라이더 카드 */}
       <div style={{
         width: '90%',
         background: 'white',
@@ -197,7 +189,6 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
         marginBottom: 30
       }}>
         <div style={{ fontSize: 60, marginBottom: 10 }}>{emoji}</div>
-        {/* 슬라이더바 (시각적 placeholder) */}
         <div style={{ width: '80%', height: 18, background: '#BFE2D6', borderRadius: 9, position: 'relative', margin: '10px 0' }}>
           <div style={{
             position: 'absolute',
@@ -213,7 +204,6 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
           }} />
         </div>
       </div>
-      {/* 감정 배워보기 카드 */}
       <div style={{
         width: '90%',
         background: 'white',
@@ -259,37 +249,29 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
 
 // --- 메인 페이지 컴포넌트: MoodTrackerPage ---
 export default function MoodTrackerPage() {
-  // --- 상태 관리 ---
-  const [showLanding, setShowLanding] = useState(true); // 첫 화면 표시 상태 추가
-  const [isHovered, setIsHovered] = useState(false); // 마우스 호버 상태 (저울 인터랙션용)
-  // 게임 모달 관련 상태
-  const [isGameModalOpen, setIsGameModalOpen] = useState(false); // 게임 모달 표시 여부
-  const [selectedEmojiForGame, setSelectedEmojiForGame] = useState(null); // 게임 모달에 표시할 선택된 이모티콘
+  const [showLanding, setShowLanding] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isGameModalOpen, setIsGameModalOpen] = useState(false);
+  const [selectedEmojiForGame, setSelectedEmojiForGame] = useState(null);
 
-  // --- 3D 저울 모델 스타일 및 위치 설정 --- (사용자 주석 및 값 참고)
-  const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] }; // 본체 위치, 크기, 회전
-  const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] }; // 날개 위치, 크기, 회전
-  const wingsPrimitiveOffset = [0, 0, 0]; // 날개 내부 요소 오프셋 (현재 사용 안 함)
+  const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
+  const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
+  const wingsPrimitiveOffset = [0, 0, 0];
 
-  // --- 이벤트 핸들러: 게임 모달 관련 ---
-  // 이모티콘 선택 시 호출되어 게임 모달을 열고 선택된 이모티콘을 상태에 저장
   const handleEmojiSelectForGame = (emoji) => {
     setSelectedEmojiForGame(emoji);
     setIsGameModalOpen(true);
   };
 
-  // 게임 모달의 닫기 버튼 클릭 시 호출되어 모달을 닫음
   const closeGameModal = () => {
     setIsGameModalOpen(false);
     setSelectedEmojiForGame(null);
   };
 
-  // Play 버튼 클릭 핸들러
   const handlePlayClick = () => {
     setShowLanding(false);
   };
 
-  // 예시 키워드 (이미지 참고)
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
 
   // --- 첫 화면 3D 모델 애니메이션 컴포넌트 ---
@@ -300,31 +282,60 @@ export default function MoodTrackerPage() {
     '/models/emotion4.gltf',
     '/models/emotion5.gltf',
   ];
-  const MODEL_SCALE = 10; // 모델 크기 (필요시 조정)
-  const FALL_SPEED_MIN = 0.005;
-  const FALL_SPEED_MAX = 0.015;
+  const NUM_FALLING_MODELS = 100; // 화면을 채울 모델 개수 증가
+  const FALLING_MODEL_SCALE = 40; // 떨어지는 모델 크기 증가
+  const FALL_SPEED_MIN = 0.005; // 이 값들은 이제 직접 사용되지 않음 (중력 기반으로 변경)
+  const FALL_SPEED_MAX = 0.015; // 이 값들은 이제 직접 사용되지 않음
 
-  // GLTF 모델 미리 로드
   EMOTION_MODEL_PATHS.forEach(path => useGLTF.preload(path));
 
-  function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight }) {
+  function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight, modelScale }) {
     const ref = React.useRef();
     const { scene } = useGLTF(modelPath);
     const clonedScene = React.useMemo(() => scene.clone(), [scene]);
-    const [speed] = useState(() => Math.random() * (FALL_SPEED_MAX - FALL_SPEED_MIN) + FALL_SPEED_MIN);
-    const [xPos] = useState(initialX);
+    
+    const [isHovered, setIsHovered] = useState(false);
+    const velocity = useRef({ x: 0, y: 0 }); // X, Y 속도
     const [rotationSpeed] = useState(() => (Math.random() - 0.5) * 0.02);
+    const [xPos] = useState(initialX);
+
 
     useFrame((state, delta) => {
       if (ref.current) {
-        ref.current.position.y -= speed * 60 * delta;
+        const currentVel = velocity.current;
+        const G_ACCEL = 0.0003;
+        const HOVER_SIDE_STRENGTH = 0.15; // 호버 시 좌우로 밀리는 힘 강도
+        const HOVER_UP_STRENGTH = 0.0008; // 호버 시 위로 밀리는 힘 강도 (중력 약간 상쇄)
+        const X_DAMPING = 0.92; // X축 이동 감속
+
+        // 중력 적용 (아래로 떨어지는 속도 증가)
+        currentVel.y += G_ACCEL * 80 * delta;
+
+        if (isHovered) {
+          // 호버 시 X축으로 랜덤하게 밀기
+          currentVel.x += (Math.random() - 0.5) * HOVER_SIDE_STRENGTH * 60 * delta;
+          // 호버 시 Y축 하강 속도 약간 줄이기 (위로 밀리는 효과)
+          currentVel.y -= HOVER_UP_STRENGTH * 60 * delta;
+        }
+
+        // 위치 업데이트
+        ref.current.position.x += currentVel.x * 60 * delta;
+        ref.current.position.y -= currentVel.y * 60 * delta; // Y 속도가 양수일 때 아래로 이동
+
+        // X축 감속
+        currentVel.x *= X_DAMPING;
+
+        // 회전
         ref.current.rotation.y += rotationSpeed * 60 * delta;
         ref.current.rotation.x += rotationSpeed * 0.5 * 60 * delta;
 
-        // 화면 하단 도달 시 화면 상단으로 리셋
-        if (ref.current.position.y < -viewportHeight / 2 - MODEL_SCALE * 3) { // 모델 크기 고려하여 여유값 추가
-          ref.current.position.y = viewportHeight / 2 + MODEL_SCALE * 3;
-          ref.current.position.x = (Math.random() - 0.5) * state.viewport.width * 0.8; // X 위치 랜덤하게 재설정
+        // 화면 하단 도달 시 리셋
+        if (ref.current.position.y < -viewportHeight / 2 - modelScale * 2) { // 여유값은 modelScale에 비례하게
+          ref.current.position.y = viewportHeight / 2 + modelScale * 2 + Math.random() * viewportHeight * 0.3;
+          ref.current.position.x = (Math.random() - 0.5) * state.viewport.width * 0.9;
+          currentVel.x = 0;
+          currentVel.y = 0; // 속도 초기화
+          setIsHovered(false); // 호버 상태도 리셋
         }
       }
     });
@@ -333,34 +344,49 @@ export default function MoodTrackerPage() {
       <primitive
         ref={ref}
         object={clonedScene}
-        scale={MODEL_SCALE}
-        position={[xPos, initialY, 0]}
+        scale={modelScale}
+        position={[xPos, initialY, 0]} // Z 위치 0으로 고정
+        onPointerOver={(event) => { 
+          event.stopPropagation(); 
+          setIsHovered(true); 
+        }}
+        onPointerOut={() => setIsHovered(false)}
       />
     );
   }
 
   function FallingModelsScene() {
     const { viewport } = useThree();
-    const numModels = EMOTION_MODEL_PATHS.length;
+    const models = [];
+
+    for (let i = 0; i < NUM_FALLING_MODELS; i++) {
+      const modelPath = EMOTION_MODEL_PATHS[i % EMOTION_MODEL_PATHS.length];
+      // 초기 Y 위치를 화면 상단 너머로 더 넓게 분산시키고, X 위치도 화면 전체에 걸쳐 랜덤하게 분산
+      const initialModelX = (Math.random() - 0.5) * viewport.width * 1.2; // X 범위를 약간 넓게
+      const initialModelY = viewport.height / 2 + FALLING_MODEL_SCALE + (i % (NUM_FALLING_MODELS / 5)) * (FALLING_MODEL_SCALE * 1.8) + Math.random() * FALLING_MODEL_SCALE;
+
+
+      models.push(
+        <FallingEmotionModel
+          key={`${modelPath}-${i}`} // 고유한 key 제공
+          modelPath={modelPath}
+          initialX={initialModelX}
+          initialY={initialModelY}
+          viewportHeight={viewport.height}
+          modelScale={FALLING_MODEL_SCALE}
+        />
+      );
+    }
 
     return (
       <>
         <ambientLight intensity={0.7} />
         <directionalLight position={[0, 10, 10]} intensity={1} />
         <directionalLight position={[0, -10, -5]} intensity={0.3} />
-        {EMOTION_MODEL_PATHS.map((modelPath, index) => (
-          <FallingEmotionModel
-            key={modelPath} // 경로가 고유하므로 key로 사용
-            modelPath={modelPath}
-            initialX={(Math.random() - 0.5) * viewport.width * 0.8}
-            initialY={viewport.height / 2 + MODEL_SCALE * 2 + index * (viewport.height / numModels) * 0.8} // 시작 Y 위치 분산
-            viewportHeight={viewport.height}
-          />
-        ))}
+        {models}
       </>
     );
   }
-  // --- 첫 화면 3D 모델 애니메이션 컴포넌트 끝 ---
 
   if (showLanding) {
     return (
@@ -368,15 +394,39 @@ export default function MoodTrackerPage() {
         width: '100vw',
         height: '100vh',
         display: 'flex',
-        justifyContent: 'center',
         alignItems: 'center',
-        background: '#B02B3A', // 양쪽 칼럼 배경색과 동일하게 변경
+        background: '#B02B3A',
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
-          <Canvas camera={{ position: [0, 0, 12], fov: 50 }}> {/* 카메라 Z 약간 뒤로 조정 */} 
+        <div style={{
+          position: 'absolute',
+          top: '80px',
+          left: 0,
+          width: '100%',
+          height: '20vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1,
+          color: 'rgba(255, 255, 255, 0.66)',
+          fontSize: 'calc(min(30vw, 35vh))',
+          fontWeight: 'bold',
+          fontFamily: 'Arial, sans-serif',
+          textAlign: 'center',
+          pointerEvents: 'none',
+          textTransform: 'uppercase'
+        }}>
+          MoMo
+        </div>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
+          <Canvas>
+            <OrthographicCamera
+              makeDefault
+              position={[0, 0, 100]} 
+              zoom={25}
+            />
             <Suspense fallback={null}>
               <FallingModelsScene />
             </Suspense>
@@ -385,17 +435,20 @@ export default function MoodTrackerPage() {
         <button
           onClick={handlePlayClick}
           style={{
-            padding: '30px 60px', // 버튼 크기 증가
-            fontSize: '36px',    // 버튼 내 텍스트 크기 증가
+            padding: '50px 100px',
+            fontSize: '60px',
             cursor: 'pointer',
             background: 'white',
-            color: '#B02B3A',     // 버튼 텍스트 색상 변경
-            border: '3px solid white', // 테두리 두께 증가
-            borderRadius: '15px',  // 모서리 둥글게
+            color: '#B02B3A',
+            border: '5px solid white',
+            borderRadius: '25px',
             fontWeight: 'bold',
-            boxShadow: '0 8px 16px rgba(0,0,0,0.3)', // 그림자 강화
-            zIndex: 2, // 다른 요소들 위에 있도록 zIndex 설정
-            position: 'relative' // zIndex 적용을 위해 position 설정
+            boxShadow: '0 12px 24px rgba(0,0,0,0.4)',
+            zIndex: 3,
+            position: 'absolute',
+            bottom: '100px',
+            left: '50%',
+            transform: 'translateX(-50%)'
           }}
         >
           Play
@@ -406,14 +459,10 @@ export default function MoodTrackerPage() {
 
   return (
     <FullScreenContainer>
-      {/* 양쪽 컬럼 프레임 추가: flex row로 배치 */}
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-        {/* 왼쪽 컬럼 */}
         <EmotionColumn emoji="😀" keywords={keywords} sliderValue={30} />
-        {/* 오른쪽 컬럼 */}
         <EmotionColumn emoji="😞" keywords={keywords} sliderValue={70} />
       </div>
-      {/* 기존 3D 캔버스, 하단 이모티콘, 모달 등은 그대로 */}
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
           <Suspense fallback={null}>
