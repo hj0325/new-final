@@ -61,9 +61,139 @@ const IconBarPlaceholder = ({ onEmojiSelect }) => {
 
 // --- UI 컴포넌트: 게임 모달 (이모티콘 클릭 시 표시) ---
 const GameModal = ({ isOpen, emoji, onClose }) => {
+  const [currentKeywordInput, setCurrentKeywordInput] = React.useState('');
+  const [userKeywords, setUserKeywords] = React.useState([]);
+
+  React.useEffect(() => {
+    // 모달이 열리거나 대상 이모티콘이 변경될 때 입력 상태 초기화
+    if (isOpen) {
+      setCurrentKeywordInput('');
+      setUserKeywords([]);
+    } else {
+      // 모달이 닫힐 때도念のため 초기화 (선택적)
+      setCurrentKeywordInput('');
+      setUserKeywords([]);
+    }
+  }, [isOpen, emoji]); 
+
   if (!isOpen || !emoji) return null;
 
-  const keywords = emojiKeywords[emoji] || ['키워드 정보 없음'];
+  // const originalKeywords = emojiKeywords[emoji] || ['키워드 정보 없음']; // 원래 키워드 (참고용으로 남겨둘 수 있음)
+
+  const handleAddKeyword = () => {
+    if (currentKeywordInput.trim() !== '') {
+      setUserKeywords(prev => [...prev, currentKeywordInput.trim()]);
+      setCurrentKeywordInput('');
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '48%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '60vw',
+      height: 'auto', // 높이를 auto로 변경하여 내용에 따라 조절
+      minHeight: '40vh', // 최소 높이 설정
+      maxHeight: '70vh', // 최대 높이 설정
+      overflowY: 'auto', // 내용이 많으면 스크롤
+      maxWidth: '600px',
+      // maxHeight: '400px', // 이 부분은 내용에 따라 유동적이므로 주석 처리 또는 삭제
+      backgroundColor: 'rgba(255, 255, 255, 0.90)',
+      border: '2px solid #eee',
+      borderRadius: '10px',
+      boxShadow: '0 8px 13px rgba(0, 0, 0, 0.71)',
+      padding: '30px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      // justifyContent: 'flex-start', // 기본값으로 변경 또는 삭제
+      gap: '15px', // 요소 간 간격 조정
+      zIndex: 1000,
+    }}>
+      <span style={{ fontSize: '100px', marginBottom: '0px' }}>{emoji}</span> {/* 이모지 크기 약간 줄임 */}
+      <h2 style={{ textAlign: 'center', marginTop: '0px', marginBottom: '10px', fontSize: '22px' }}>나의 감정 키워드</h2>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '90%', marginBottom:'10px' }}>
+        <input 
+          type="text"
+          value={currentKeywordInput}
+          onChange={(e) => setCurrentKeywordInput(e.target.value)}
+          placeholder="키워드 입력"
+          style={{
+            flexGrow: 1,
+            padding: '10px 15px',
+            fontSize: '16px',
+            borderRadius: '5px',
+            border: '1px solid #ccc',
+            boxSizing: 'border-box'
+          }}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleAddKeyword();
+            }
+          }}
+        />
+        <button onClick={handleAddKeyword} style={{
+          padding: '10px 15px',
+          fontSize: '16px',
+          cursor: 'pointer',
+          background: '#5cb85c', // 초록색 계열 버튼
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px'
+        }}>
+          추가
+        </button>
+      </div>
+
+      <div style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        gap: '8px',  // 키워드 간 간격
+        justifyContent: 'center', 
+        width: '100%', 
+        padding: '10px 0', 
+        minHeight: '50px' // 키워드가 없을 때도 최소 높이 유지
+      }}>
+        {userKeywords.length > 0 ? userKeywords.map((keyword, index) => (
+          <span key={index} style={{
+            padding: '8px 15px',
+            background: '#ffc0cb',
+            borderRadius: '30px',
+            fontSize: '18px' // 폰트 크기 통일
+          }}>
+            {keyword}
+          </span>
+        )) : (
+          <span style={{color: '#888', fontSize: '16px'}}>입력한 키워드가 여기에 표시됩니다.</span>
+        )}
+      </div>
+      <button onClick={onClose} style={{
+        marginTop: 'auto', // 버튼을 아래로 밀기
+        padding: '10px 20px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        background: '#007bff',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px'
+      }}>
+        닫기
+      </button>
+    </div>
+  );
+};
+
+// --- UI 컴포넌트: 첫 화면 텍스트 입력 모달 ---
+const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }) => {
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    onSubmit(currentText);
+    onClose();
+  };
 
   return (
     <div style={{
@@ -83,35 +213,40 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'flex-start', 
-      gap: '10px',
-      zIndex: 1000,
+      justifyContent: 'space-between', // 요소들 사이에 공간 배분
+      gap: '20px',
+      zIndex: 1001, // GameModal보다 위에, 또는 다른 모달과 겹치지 않게
     }}>
-      <span style={{ fontSize: '110px' }}>{emoji}</span>
-      <h2 style={{ textAlign: 'center', marginTop: '2px', marginBottom: '20px' }}>관련 키워드</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', justifyContent: 'center' }}>
-        {keywords.map((keyword, index) => (
-          <span key={index} style={{
-            padding: '8px 15px',
-            background: '#ffc0cb',
-            borderRadius: '30px',
-            fontSize: '25px'
-          }}>
-            {keyword}
-          </span>
-        ))}
-      </div>
-      <button onClick={onClose} style={{
-        marginTop: 'auto',
-        padding: '10px 20px',
-        fontSize: '16px',
+      <h2 style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px', fontSize: '30px', color: '#333' }}>
+        오늘의 무게 단어
+      </h2>
+      <textarea
+        value={currentText}
+        onChange={(e) => onTextChange(e.target.value)}
+        placeholder="단어 입력"
+        style={{
+          width: '90%',
+          height: '100px', // 높이 조절
+          padding: '30px',
+          fontSize: '30px',
+          borderRadius: '8px',
+          border: '1px solid #ccc',
+          resize: 'none', // 사용자가 크기 조절 못하게
+          boxSizing: 'border-box',
+          textAlign: 'center',
+        }}
+      />
+      <button onClick={handleSubmit} style={{
+        padding: '12px 25px',
+        fontSize: '18px',
         cursor: 'pointer',
         background: '#007bff',
         color: 'white',
         border: 'none',
-        borderRadius: '5px'
+        borderRadius: '5px',
+        alignSelf: 'center', // 버튼 중앙 정렬
       }}>
-        닫기
+        확인
       </button>
     </div>
   );
@@ -253,6 +388,8 @@ export default function MoodTrackerPage() {
   const [isHovered, setIsHovered] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [selectedEmojiForGame, setSelectedEmojiForGame] = useState(null);
+  const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false); // 텍스트 입력 모달 상태
+  const [userInputText, setUserInputText] = useState(''); // 사용자 입력 텍스트 상태
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
@@ -269,7 +406,14 @@ export default function MoodTrackerPage() {
   };
 
   const handlePlayClick = () => {
-    setShowLanding(false);
+    // setShowLanding(false); // 직접 화면 전환하는 대신 모달 열기
+    setIsTextInputModalOpen(true);
+  };
+
+  const handleTextInputSubmit = (text) => {
+    setUserInputText(text);
+    // 모달의 onClose가 호출되므로 여기서는 isTextInputModalOpen을 false로 설정할 필요 없음
+    setShowLanding(false); // 메인 화면으로 전환
   };
 
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
@@ -453,12 +597,40 @@ export default function MoodTrackerPage() {
         >
           Play
         </button>
+        <TextInputModal
+          isOpen={isTextInputModalOpen}
+          onClose={() => setIsTextInputModalOpen(false)}
+          currentText={userInputText}
+          onTextChange={setUserInputText}
+          onSubmit={handleTextInputSubmit}
+        />
       </div>
     );
   }
 
   return (
     <FullScreenContainer>
+      {userInputText && (
+        <div style={{
+          position: 'absolute',
+          top: '30px', // 상단 여백 증가
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '12px 25px', // 패딩 증가
+          background: 'rgba(255, 255, 255, 0.85)', // 배경 약간 더 불투명하게
+          borderRadius: '12px', // 더 둥글게
+          boxShadow: '0 4px 8px rgba(0,0,0,0.15)', // 그림자 약간 강화
+          fontSize: '20px', // 폰트 크기 증가
+          fontWeight: '500', // 폰트 두께
+          color: '#333', // 텍스트 색상
+          zIndex: 100, // 다른 UI 요소 위에 오도록
+          textAlign: 'center',
+          minWidth: '200px',
+          maxWidth: '80%',
+        }}>
+          {userInputText}
+        </div>
+      )}
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
         <EmotionColumn emoji="😀" keywords={keywords} sliderValue={30} />
         <EmotionColumn emoji="😞" keywords={keywords} sliderValue={70} />
