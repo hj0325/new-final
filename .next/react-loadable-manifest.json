@@ -8,5 +8,9 @@
     "files": [
       "static/chunks/_pages-dir-browser_node_modules_mediapipe_tasks-vision_vision_bundle_mjs.js"
     ]
+  },
+  "node_modules/@react-three/rapier/dist/react-three-rapier.esm.js -> @dimforge/rapier3d-compat": {
+    "id": "node_modules/@react-three/rapier/dist/react-three-rapier.esm.js -> @dimforge/rapier3d-compat",
+    "files": []
   }
 }

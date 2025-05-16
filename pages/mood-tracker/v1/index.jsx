@@ -1,13 +1,23 @@
 import React, { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, OrthographicCamera, useGLTF } from '@react-three/drei';
+import { Environment, OrthographicCamera } from '@react-three/drei';
+import { Physics } from '@react-three/rapier';
 import FullScreenContainer from '../../../components/mood-tracker/v1/FullScreenContainer';
-import IconBarPlaceholder from '../../../components/mood-tracker/v1/IconBarPlaceholder';
 import GameModal from '../../../components/mood-tracker/v1/GameModal';
 import TextInputModal from '../../../components/mood-tracker/v1/TextInputModal';
 import ScaledScene from '../../../components/mood-tracker/v1/ScaledScene';
 import EmotionColumn from '../../../components/mood-tracker/v1/EmotionColumn';
 import { FallingModelsScene } from '../../../components/mood-tracker/v1/FallingModels';
+import EmojiSelector3D from '../../../components/mood-tracker/v1/EmojiSelector3D';
+
+// Emoji ID와 실제 Emoji 문자를 매핑합니다.
+const emojiIdToChar = {
+  'joy': '😀',
+  'surprise': '😮',
+  'neutral': '😐',
+  'sadness': '😖',
+  'anger': '😠',
+};
 
 // --- 데이터 정의: 이모티콘별 키워드 ---
 // const emojiKeywords = { ... }; // Moved to components/mood-tracker/v1/constants.js
@@ -35,7 +45,7 @@ export default function MoodTrackerPage() {
   const [showLanding, setShowLanding] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
-  const [selectedEmojiForGame, setSelectedEmojiForGame] = useState(null);
+  const [selectedEmojiForGameModal, setSelectedEmojiForGameModal] = useState(null);
   const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false);
   const [userInputText, setUserInputText] = useState('');
 
@@ -43,14 +53,17 @@ export default function MoodTrackerPage() {
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
   const wingsPrimitiveOffset = [0, 0, 0];
 
-  const handleEmojiSelectForGame = (emoji) => {
-    setSelectedEmojiForGame(emoji);
-    setIsGameModalOpen(true);
+  const handleEmoji3DClick = (emojiId) => {
+    const emojiChar = emojiIdToChar[emojiId];
+    if (emojiChar) {
+      setSelectedEmojiForGameModal(emojiChar);
+      setIsGameModalOpen(true);
+    }
   };
 
   const closeGameModal = () => {
     setIsGameModalOpen(false);
-    setSelectedEmojiForGame(null);
+    setSelectedEmojiForGameModal(null);
   };
 
   const handlePlayClick = () => {
@@ -197,20 +210,22 @@ export default function MoodTrackerPage() {
               color="#E3F2FD"
             />
             <Environment preset="sunset" intensity={0.8} blur={0.5} />
-            <ScaledScene
-              isHovered={isHovered}
-              onHover={setIsHovered}
-              bodyProps={bodyProps}
-              wingsProps={wingsProps}
-              wingsPrimitiveOffset={wingsPrimitiveOffset}
-              tiltAngle={Math.PI / 20}
-              verticalMovementFactor={0.03}
-            />
+            <Physics>
+              <ScaledScene
+                isHovered={isHovered}
+                onHover={setIsHovered}
+                bodyProps={bodyProps}
+                wingsProps={wingsProps}
+                wingsPrimitiveOffset={wingsPrimitiveOffset}
+                tiltAngle={Math.PI / 20}
+                verticalMovementFactor={0.03}
+              />
+              <EmojiSelector3D onEmojiClick={handleEmoji3DClick} />
+            </Physics>
           </Suspense>
         </Canvas>
       </div>
-      <IconBarPlaceholder onEmojiSelect={handleEmojiSelectForGame} />
-      <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGame} onClose={closeGameModal} />
+      <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGameModal} onClose={closeGameModal} />
     </FullScreenContainer>
   );
 }
