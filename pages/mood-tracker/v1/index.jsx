@@ -9,6 +9,7 @@ import ScaledScene from '../../../components/mood-tracker/v1/ScaledScene';
 import EmotionColumn from '../../../components/mood-tracker/v1/EmotionColumn';
 import { FallingModelsScene } from '../../../components/mood-tracker/v1/FallingModels';
 import EmojiSelector3D from '../../../components/mood-tracker/v1/EmojiSelector3D';
+import Emoji3D from '../../../components/mood-tracker/v1/Emoji3D';
 
 // Emoji ID와 실제 Emoji 문자를 매핑합니다.
 const emojiIdToChar = {
@@ -43,11 +44,11 @@ const emojiIdToChar = {
 // --- 메인 페이지 컴포넌트: MoodTrackerPage ---
 export default function MoodTrackerPage() {
   const [showLanding, setShowLanding] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [selectedEmojiForGameModal, setSelectedEmojiForGameModal] = useState(null);
   const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false);
   const [userInputText, setUserInputText] = useState('');
+  const [droppedEmojis, setDroppedEmojis] = useState([]);
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
@@ -59,6 +60,18 @@ export default function MoodTrackerPage() {
       setSelectedEmojiForGameModal(emojiChar);
       setIsGameModalOpen(true);
     }
+  };
+
+  const handleEmojiDrop = (emojiId, position, modelPath, emojiScale) => {
+    console.log(`Emoji ${emojiId} dropped at`, position, `with model ${modelPath} and scale ${emojiScale}`);
+    const newDroppedEmoji = {
+      id: emojiId,
+      modelPath: modelPath,
+      position: [position.x, position.y, position.z],
+      scale: emojiScale,
+      key: `${emojiId}-${Date.now()}`
+    };
+    setDroppedEmojis(prev => [...prev, newDroppedEmoji]);
   };
 
   const closeGameModal = () => {
@@ -75,20 +88,7 @@ export default function MoodTrackerPage() {
     setShowLanding(false);
   };
 
-  const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한']; // This can remain or be moved if it's specific to a component
-
-  // --- 첫 화면 3D 모델 애니메이션 컴포넌트 ---
-  // const EMOTION_MODEL_PATHS = [ ... ]; // Moved
-  // const NUM_FALLING_MODELS = 100; // Moved
-  // const FALLING_MODEL_SCALE = 40; // Moved
-  // const FALL_SPEED_MIN = 0.005; // Moved
-  // const FALL_SPEED_MAX = 0.015; // Moved
-
-  // EMOTION_MODEL_PATHS.forEach(path => useGLTF.preload(path)); // Moved to FallingModels.jsx
-
-  // function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight, modelScale }) { ... }; // Moved
-
-  // function FallingModelsScene() { ... }; // Moved and exported
+  const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
 
   if (showLanding) {
     return (
@@ -212,15 +212,26 @@ export default function MoodTrackerPage() {
             <Environment preset="sunset" intensity={0.8} blur={0.5} />
             <Physics>
               <ScaledScene
-                isHovered={isHovered}
-                onHover={setIsHovered}
                 bodyProps={bodyProps}
                 wingsProps={wingsProps}
                 wingsPrimitiveOffset={wingsPrimitiveOffset}
                 tiltAngle={Math.PI / 20}
                 verticalMovementFactor={0.03}
               />
-              <EmojiSelector3D onEmojiClick={handleEmoji3DClick} />
+              <EmojiSelector3D 
+                onEmojiClick={handleEmoji3DClick} 
+                onEmojiDrop={handleEmojiDrop}
+              />
+              {droppedEmojis.map(emoji => (
+                <Emoji3D 
+                  key={emoji.key} 
+                  emojiId={emoji.id} 
+                  modelPath={emoji.modelPath} 
+                  initialPosition={emoji.position} 
+                  scale={emoji.scale}
+                  draggable={false}
+                />
+              ))}
             </Physics>
           </Suspense>
         </Canvas>

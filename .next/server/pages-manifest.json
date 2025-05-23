@@ -2,6 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
+  "/": "pages/index.js",
   "/mood-tracker": "pages/mood-tracker.js",
-  "/mood-tracker/v1": "pages/mood-tracker/v1.js"
+  "/mood-tracker/v1": "pages/mood-tracker/v1.js",
+  "/mood-tracker/v2": "pages/mood-tracker/v2.js"
 }
