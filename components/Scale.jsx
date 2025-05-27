@@ -52,7 +52,7 @@ export default function Scale({
         colliders={false}
         name="scale-body"
       >
-        <primitive object={bodyScene} />
+      <primitive object={bodyScene} />
         <CuboidCollider args={bodyColliderArgs} position={[0, 0, 0]} />
       </RigidBody>
 
@@ -60,7 +60,7 @@ export default function Scale({
         type="fixed" 
         colliders={false} 
         position={wingsLeftProps.position}
-        scale={wingsLeftProps.scale} 
+        scale={wingsLeftProps.scale}
         rotation={wingsLeftProps.rotation}
         name="scale-wing-left"
         ref={wingsLeftGroupRef}
@@ -73,7 +73,7 @@ export default function Scale({
         type="fixed" 
         colliders={false} 
         position={wingsRightProps.position}
-        scale={wingsRightProps.scale} 
+        scale={wingsRightProps.scale}
         rotation={wingsRightProps.rotation}
         name="scale-wing-right"
         ref={wingsRightGroupRef}

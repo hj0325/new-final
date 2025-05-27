@@ -41,21 +41,30 @@ function EmojiSelector3D({ onEmojiClick, onEmojiDrop }) {
         THREE.MathUtils.degToRad(groupRotationZ),
       ]}
     >
-      {EMOTION_MODEL_PATHS.map((emoji, index) => (
-        <Emoji3D
-          key={emoji.id}
-          emojiId={emoji.id}
-          modelPath={emoji.path}
-          initialPosition={[
-            startX + index * emojiSpacing, 
-            emojiYPosition, // 여기에서 수직 위치가 적용됩니다.
-            emojiZPosition
-          ]}
-          scale={emojiScale}
-          onClick={() => onEmojiClick(emoji.id)}
-          onDrop={(emojiId, position) => onEmojiDrop(emojiId, position, emoji.path, emojiScale)}
-        />
-      ))}
+      {EMOTION_MODEL_PATHS.map((emoji, index) => {
+        const position = [
+          startX + index * emojiSpacing, 
+          emojiYPosition, // 여기에서 수직 위치가 적용됩니다.
+          emojiZPosition
+        ];
+        return (
+          <Emoji3D
+            key={emoji.id}
+            emojiId={emoji.id}
+            modelPath={emoji.path}
+            initialPosition={position}
+            scale={emojiScale}
+            onClick={() => {
+              console.log('🎯 이모지 클릭:', emoji.id);
+              onEmojiClick(emoji.id);
+            }}
+            onDrop={(emojiId, position) => {
+              console.log('🎯 이모지 드롭:', emojiId);
+              onEmojiDrop(emojiId, position, emoji.path, emojiScale);
+            }}
+          />
+        );
+      })}
     </group>
   );
 }

@@ -1,0 +1,68 @@
+import React from 'react';
+
+const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }) => {
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    onSubmit(currentText);
+    onClose();
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: '48%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '60vw',
+      height: '60vh',
+      maxWidth: '600px',
+      maxHeight: '400px',
+      backgroundColor: 'rgba(255, 255, 255, 0.90)',
+      border: '2px solid #eee',
+      borderRadius: '10px',
+      boxShadow: '0 8px 13px rgba(0, 0, 0, 0.71)',
+      padding: '30px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '20px',
+      zIndex: 1001,
+    }}>
+      <h2 style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px', fontSize: '30px', color: '#333' }}>
+        오늘의 무게 단어
+      </h2>
+      <textarea
+        value={currentText}
+        onChange={(e) => onTextChange(e.target.value)}
+        placeholder="단어 입력"
+        style={{
+          width: '90%',
+          height: '100px',
+          padding: '30px',
+          fontSize: '30px',
+          borderRadius: '8px',
+          border: '1px solid #ccc',
+          resize: 'none',
+          boxSizing: 'border-box',
+          textAlign: 'center',
+        }}
+      />
+      <button onClick={handleSubmit} style={{
+        padding: '12px 25px',
+        fontSize: '18px',
+        cursor: 'pointer',
+        background: '#007bff',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        alignSelf: 'center',
+      }}>
+        확인
+      </button>
+    </div>
+  );
+};
+
+export default TextInputModal; 

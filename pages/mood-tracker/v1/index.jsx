@@ -43,6 +43,8 @@ const emojiIdToChar = {
 
 // --- 메인 페이지 컴포넌트: MoodTrackerPage ---
 export default function MoodTrackerPage() {
+  console.log('=== MoodTrackerPage 시작 ===');
+  
   const [showLanding, setShowLanding] = useState(true);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [selectedEmojiForGameModal, setSelectedEmojiForGameModal] = useState(null);
@@ -55,15 +57,18 @@ export default function MoodTrackerPage() {
   const wingsPrimitiveOffset = [0, 0, 0];
 
   const handleEmoji3DClick = (emojiId) => {
+    console.log('🎯 클릭:', emojiId);
     const emojiChar = emojiIdToChar[emojiId];
     if (emojiChar) {
       setSelectedEmojiForGameModal(emojiChar);
-      setIsGameModalOpen(true);
+    setIsGameModalOpen(true);
+      console.log('✅ GameModal 열림');
     }
   };
 
   const handleEmojiDrop = (emojiId, position, modelPath, emojiScale) => {
-    console.log(`Emoji ${emojiId} dropped at`, position, `with model ${modelPath} and scale ${emojiScale}`);
+    console.log('🎯 드롭:', emojiId, 'at', position);
+    
     const newDroppedEmoji = {
       id: emojiId,
       modelPath: modelPath,
@@ -72,18 +77,22 @@ export default function MoodTrackerPage() {
       key: `${emojiId}-${Date.now()}`
     };
     setDroppedEmojis(prev => [...prev, newDroppedEmoji]);
+    console.log('✅ 드롭된 이모지 개수:', droppedEmojis.length + 1);
   };
 
   const closeGameModal = () => {
+    console.log('🎯 GameModal 닫기');
     setIsGameModalOpen(false);
     setSelectedEmojiForGameModal(null);
   };
 
   const handlePlayClick = () => {
+    console.log('🎯 Play 버튼 클릭');
     setIsTextInputModalOpen(true);
   };
 
   const handleTextInputSubmit = (text) => {
+    console.log('🎯 텍스트 입력 완료:', text);
     setUserInputText(text);
     setShowLanding(false);
   };
@@ -91,6 +100,7 @@ export default function MoodTrackerPage() {
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
 
   if (showLanding) {
+    console.log('🌟 Landing 화면');
     return (
       <div style={{
         width: '100vw',
@@ -211,13 +221,13 @@ export default function MoodTrackerPage() {
             />
             <Environment preset="sunset" intensity={0.8} blur={0.5} />
             <Physics>
-              <ScaledScene
-                bodyProps={bodyProps}
-                wingsProps={wingsProps}
-                wingsPrimitiveOffset={wingsPrimitiveOffset}
-                tiltAngle={Math.PI / 20}
-                verticalMovementFactor={0.03}
-              />
+            <ScaledScene
+              bodyProps={bodyProps}
+              wingsProps={wingsProps}
+              wingsPrimitiveOffset={wingsPrimitiveOffset}
+              tiltAngle={Math.PI / 20}
+              verticalMovementFactor={0.03}
+            />
               <EmojiSelector3D 
                 onEmojiClick={handleEmoji3DClick} 
                 onEmojiDrop={handleEmojiDrop}

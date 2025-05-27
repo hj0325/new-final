@@ -26,96 +26,53 @@ function Emoji3D({ modelPath, initialPosition = [0, 0, 0], scale = 0.5, onClick,
 
   const bind = useDrag(({ active, movement: [mx, my], event, first, last, memo }) => {
     if (!draggable) return;
+    
+    if (first) {
+      console.log('🖱️ 드래그 시작:', emojiId);
+    }
+    
     setIsDragging(active);
+    
     if (active && rigidBodyRef.current) {
-      let previousPosition;
-      if (first) { // On drag start
-        // memo will store the initial world position of the object
-        const currentRigidBodyPos = rigidBodyRef.current.translation();
-        previousPosition = new THREE.Vector3(currentRigidBodyPos.x, currentRigidBodyPos.y, currentRigidBodyPos.z);
-      } else {
-        previousPosition = memo;
-      }
-
-      // Project mouse position to a plane at the object's Z depth
-      const mousePlanePos = new THREE.Vector3();
-      mousePlanePos.set(
-        (event.clientX / size.width) * 2 - 1,
-        -(event.clientY / size.height) * 2 + 1,
-        0.5 // NDC Z coordinate
-      );
-      mousePlanePos.unproject(camera);
-      const dir = mousePlanePos.sub(camera.position).normalize();
-      const distance = (previousPosition.z - camera.position.z) / dir.z;
-      const newWorldPos = camera.position.clone().add(dir.multiplyScalar(distance));
-      
-      // Calculate the delta from the initial drag point in world space
-      // This requires knowing the initial point where drag started in world space
-      // and the current mouse point in world space.
-      
-      // For simplicity, let's try a simpler delta based on screen movement for now,
-      // and refine if this isn't smooth enough.
-      // The viewport.width / size.width gives a factor to convert screen pixels to world units at z=0.
-      // We need to adjust this for the object's actual depth.
-      const factor = (viewport.width / size.width) * (previousPosition.z / camera.near); // Approximate adjustment for depth
-      // A more robust solution might involve projecting the initial and current mouse points
-      // to the object's Z plane and calculating the world-space delta there.
-
-      // If this is the first drag event, memoize the initial position
+      // 첫 드래그 시 초기 위치와 마우스 위치 저장
       if (first) {
-         memo = rigidBodyRef.current.translation();
+        const currentPos = rigidBodyRef.current.translation();
+        memo = { 
+          initialX: currentPos.x, 
+          initialY: currentPos.y, 
+          initialZ: currentPos.z
+        };
       }
 
-      // Calculate new position based on initial position (memo) and screen delta (mx, my)
-      // This translation needs to be relative to the camera's orientation if it's not fixed
-      // For a fixed camera, we can map screen dx/dy to world dx/dy
-      const worldDx = mx * (viewport.width / size.width);
-      const worldDy = -my * (viewport.height / size.height); // Y is inverted
+      // 감도 조정 - 더 자연스러운 드래그를 위해 증가
+      const scale = viewport.width / size.width * 0.02;
       
-      // We need to find the initial world position (memo) and add worldDx, worldDy
-      // This is still not perfect as it doesn't account for camera perspective fully.
-      // A common approach: map screen coords to a plane intersecting the object.
-      
-      // Let's use the setNextKinematicTranslation with a calculated new position
-      // The current `pos` from unprojection is where the mouse *is* on the plane,
-      // not the delta. We need to apply the *movement* (mx, my).
+      const newX = memo.initialX + mx * scale;
+      const newY = memo.initialY - my * scale; // Y축 반전
+      const newZ = memo.initialZ; // Z축 고정
 
-      // On the first frame of drag, record the initial position in `memo`
-      if (first) {
-        const currentPosVec = rigidBodyRef.current.translation();
-        memo = { x: currentPosVec.x, y: currentPosVec.y, z: currentPosVec.z, screenX: event.clientX, screenY: event.clientY };
-      }
+      rigidBodyRef.current.setNextKinematicTranslation({ x: newX, y: newY, z: newZ });
 
-      // Calculate the change in screen coordinates
-      const screenDeltaX = event.clientX - memo.screenX;
-      const screenDeltaY = event.clientY - memo.screenY;
-
-      // Convert screen delta to world delta at the object's depth
-      // This requires knowing the size of a pixel in world units at that depth
-      // This is a simplification and might need adjustment based on camera FOV / type
-      const worldUnitsPerPixelX = viewport.width / size.width;
-      const worldUnitsPerPixelY = viewport.height / size.height;
-
-      const newX = memo.x + screenDeltaX * worldUnitsPerPixelX;
-      const newY = memo.y - screenDeltaY * worldUnitsPerPixelY; // Screen Y is often inverted in 3D
-
-      rigidBodyRef.current.setNextKinematicTranslation({ x: newX, y: newY, z: memo.z });
-
-    } else if (last && onDrop && isDragging) { // Drag ended (use `last` from useDrag)
+    } else if (last && onDrop && isDragging) {
         if (rigidBodyRef.current) {
             const finalPosition = rigidBodyRef.current.translation();
+            console.log('🎯 드래그 종료:', emojiId, 'at', finalPosition);
+            console.log('📍 저울 영역 참고: 왼쪽 날개 [-0.4~0, 0.1~0.3], 오른쪽 날개 [0~0.4, 0.1~0.3]');
             onDrop(emojiId, finalPosition); 
         }
-        setIsDragging(false); // Reset dragging state
+        setIsDragging(false);
     }
+    
     return memo;
   }, {
     enabled: draggable,
   });
 
   const handleClick = (event) => {
+    console.log('🎯 클릭:', emojiId, 'draggable:', draggable);
     event.stopPropagation();
     if (onClick && !isDragging && draggable) {
+      console.log('✅ 클릭 핸들러 실행:', emojiId);
       onClick();
     }
   };
