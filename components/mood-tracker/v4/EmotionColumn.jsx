@@ -1,6 +1,6 @@
 import React from 'react';
 
-function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSliderChange }) {
+function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 5, onSliderChange }) {
   return (
     <div style={{
       width: 260,
@@ -39,10 +39,74 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
         marginBottom: 30
       }}>
         <div style={{ fontSize: 60, marginBottom: 10, minHeight: 72 }}>{emoji || ''}</div>
-        <div style={{ width: '80%', height: 18, background: '#BFE2D6', borderRadius: 9, position: 'relative', margin: '10px 0' }}>
+        <div 
+          style={{ 
+            width: '80%', 
+            height: 18, 
+            background: '#BFE2D6', 
+            borderRadius: 9, 
+            position: 'relative', 
+            margin: '10px 0',
+            cursor: 'pointer'
+          }}
+          onMouseDown={(e) => {
+            if (!onSliderChange) return;
+            e.preventDefault();
+            
+            const rect = e.currentTarget.getBoundingClientRect();
+            const startX = rect.left;
+            const width = rect.width;
+            
+            const handleMove = (clientX) => {
+              const x = clientX - startX;
+              const percentage = Math.max(0, Math.min(100, (x / width) * 100));
+              const newValue = Math.round((percentage / 100) * 10); // 0-10 범위로 변환
+              onSliderChange(newValue);
+            };
+            
+            const handleMouseMove = (moveEvent) => handleMove(moveEvent.clientX);
+            const handleTouchMove = (touchEvent) => {
+              touchEvent.preventDefault();
+              handleMove(touchEvent.touches[0].clientX);
+            };
+            
+            const handleEnd = () => {
+              document.removeEventListener('mousemove', handleMouseMove);
+              document.removeEventListener('mouseup', handleEnd);
+              document.removeEventListener('touchmove', handleTouchMove);
+              document.removeEventListener('touchend', handleEnd);
+            };
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleEnd);
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleEnd);
+            
+            // 초기 클릭/터치 위치에서도 값 설정
+            handleMove(e.clientX);
+          }}
+          onTouchStart={(e) => {
+            if (!onSliderChange) return;
+            e.preventDefault();
+            
+            const rect = e.currentTarget.getBoundingClientRect();
+            const startX = rect.left;
+            const width = rect.width;
+            
+            const handleMove = (clientX) => {
+              const x = clientX - startX;
+              const percentage = Math.max(0, Math.min(100, (x / width) * 100));
+              const newValue = Math.round((percentage / 100) * 10);
+              onSliderChange(newValue);
+            };
+            
+            // 초기 터치 위치에서 값 설정
+            handleMove(e.touches[0].clientX);
+          }}
+        >
           <div style={{
             position: 'absolute',
-            left: `calc(${sliderValue}% - 18px)`,
+            left: `calc(${(sliderValue / 10) * 100}% - 16px)`, // 0-10 값을 0-100%로 변환
             top: -7,
             width: 32,
             height: 32,
@@ -50,8 +114,20 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
             borderRadius: '50%',
             boxShadow: '0 2px 6px rgba(0,0,0,0.13)',
             border: '3px solid #fff',
-            transition: 'left 0.2s'
+            transition: 'left 0.2s',
+            cursor: 'grab'
           }} />
+          <div style={{
+            position: 'absolute',
+            top: 25,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: 14,
+            fontWeight: 600,
+            color: '#666'
+          }}>
+            {sliderValue}
+          </div>
         </div>
       </div>
       <div style={{

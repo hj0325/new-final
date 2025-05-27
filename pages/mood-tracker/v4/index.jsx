@@ -54,6 +54,8 @@ export default function MoodTrackerPage() {
   const [emojiKeywords, setEmojiKeywords] = useState({});
   const [leftColumnKeywords, setLeftColumnKeywords] = useState([]);
   const [rightColumnKeywords, setRightColumnKeywords] = useState([]);
+  const [leftSliderValue, setLeftSliderValue] = useState(3);
+  const [rightSliderValue, setRightSliderValue] = useState(7);
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
@@ -204,8 +206,18 @@ export default function MoodTrackerPage() {
         </div>
       )}
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-        <EmotionColumn emoji={leftColumnEmoji} keywords={leftColumnKeywords} sliderValue={30} />
-        <EmotionColumn emoji={rightColumnEmoji} keywords={rightColumnKeywords} sliderValue={70} />
+        <EmotionColumn 
+          emoji={leftColumnEmoji} 
+          keywords={leftColumnKeywords} 
+          sliderValue={leftSliderValue}
+          onSliderChange={setLeftSliderValue}
+        />
+        <EmotionColumn 
+          emoji={rightColumnEmoji} 
+          keywords={rightColumnKeywords} 
+          sliderValue={rightSliderValue}
+          onSliderChange={setRightSliderValue}
+        />
       </div>
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
