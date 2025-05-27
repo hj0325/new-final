@@ -10,6 +10,7 @@ import EmotionColumn from '../../../components/mood-tracker/v4/EmotionColumn';
 import { FallingModelsScene } from '../../../components/mood-tracker/v4/FallingModels';
 import EmojiSelector3D from '../../../components/mood-tracker/v4/EmojiSelector3D';
 import Emoji3D from '../../../components/mood-tracker/v4/Emoji3D';
+import FallingEmojiManager from '../../../components/mood-tracker/v4/FallingEmojiManager';
 
 // Emoji ID와 실제 Emoji 문자를 매핑합니다.
 const emojiIdToChar = {
@@ -236,7 +237,7 @@ export default function MoodTrackerPage() {
               color="#E3F2FD"
             />
             <Environment preset="sunset" intensity={0.8} blur={0.5} />
-            <Physics>
+                        <Physics>
             <ScaledScene
               bodyProps={bodyProps}
               wingsProps={wingsProps}
@@ -246,6 +247,12 @@ export default function MoodTrackerPage() {
             />
               <EmojiSelector3D 
                 onEmojiClick={handleEmoji3DClick} 
+                />
+              <FallingEmojiManager
+                leftCount={leftColumnEmoji ? leftSliderValue : 0}
+                rightCount={rightColumnEmoji ? rightSliderValue : 0}
+                leftEmojiType={leftColumnEmoji}
+                rightEmojiType={rightColumnEmoji}
               />
             </Physics>
           </Suspense>
