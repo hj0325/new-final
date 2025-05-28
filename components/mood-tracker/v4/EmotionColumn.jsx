@@ -1,6 +1,6 @@
 import React from 'react';
 
-function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 5, onSliderChange }) {
+function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 5, onSliderChange, onStartGame }) {
   return (
     <div style={{
       width: 260,
@@ -168,6 +168,7 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 5, onSlide
           boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
           cursor: 'pointer'
         }}
+        onClick={onStartGame}
       >만들기 시작</button>
     </div>
   );

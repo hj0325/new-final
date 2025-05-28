@@ -42,6 +42,349 @@ const emojiIdToChar = {
 // --- 감정 컬럼(프레임) 컴포넌트 ---
 // function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSliderChange }) { ... }; // Moved
 
+// --- UI 컴포넌트: 게임 생성 모달 ---
+const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, onClose, onStart }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #B02B3A 0%, #8B1E2B 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 2000,
+      animation: 'fadeIn 0.3s ease-in-out'
+    }}>
+      {/* 배경 장식 요소들 */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        left: '10%',
+        width: '100px',
+        height: '100px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '50%',
+        animation: 'float 6s ease-in-out infinite'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '15%',
+        right: '15%',
+        width: '150px',
+        height: '150px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '50%',
+        animation: 'float 8s ease-in-out infinite reverse'
+      }} />
+      <div style={{
+        position: 'absolute',
+        top: '20%',
+        right: '20%',
+        width: '80px',
+        height: '80px',
+        background: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: '50%',
+        animation: 'float 7s ease-in-out infinite'
+      }} />
+
+      <div style={{
+        width: '80vw',
+        height: '70vh',
+        maxWidth: '800px',
+        maxHeight: '600px',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        border: '3px solid #B02B3A',
+        borderRadius: '20px',
+        boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
+        padding: '40px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '30px',
+        position: 'relative',
+        backdropFilter: 'blur(10px)',
+        animation: 'slideIn 0.4s ease-out'
+      }}>
+        {/* 닫기 버튼 */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '15px',
+            right: '20px',
+            background: 'none',
+            border: 'none',
+            fontSize: '30px',
+            cursor: 'pointer',
+            color: '#B02B3A',
+            fontWeight: 'bold',
+            transition: 'transform 0.2s ease'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.transform = 'scale(1.1)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.transform = 'scale(1)';
+          }}
+        >
+          ×
+        </button>
+
+        {/* 우세한 이모티콘 표시 */}
+        <div style={{
+          fontSize: '120px',
+          marginBottom: '10px',
+          textShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          animation: 'bounce 2s ease-in-out infinite'
+        }}>
+          {dominantEmoji}
+        </div>
+
+        {/* 메인 문구 */}
+        <h1 style={{
+          textAlign: 'center',
+          fontSize: '28px',
+          fontWeight: 'bold',
+          color: '#B02B3A',
+          margin: '0',
+          lineHeight: '1.4',
+          animation: 'fadeInUp 0.6s ease-out'
+        }}>
+          "{keyword}"의 감정 생물을 만들어 보아요!
+        </h1>
+
+        {/* 키워드 표시 */}
+        <div style={{
+          padding: '15px 30px',
+          background: '#D2F2E9',
+          borderRadius: '25px',
+          fontSize: '18px',
+          fontWeight: '600',
+          color: '#333',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          animation: 'fadeInUp 0.8s ease-out',
+          textAlign: 'center',
+          minHeight: '50px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {dominantKeywords && dominantKeywords.length > 0 ? (
+            dominantKeywords.map((keyword, index) => (
+              <span key={index} style={{
+                padding: '5px 12px',
+                background: 'rgba(176, 43, 58, 0.1)',
+                borderRadius: '15px',
+                fontSize: '16px'
+              }}>
+                {keyword}
+              </span>
+            ))
+          ) : (
+            <span style={{ color: '#666', fontSize: '16px' }}>
+              감정 키워드가 없습니다
+            </span>
+          )}
+        </div>
+
+        {/* 게임 시작 버튼 */}
+        <button 
+          style={{
+            padding: '15px 40px',
+            fontSize: '22px',
+            fontWeight: 'bold',
+            background: '#B02B3A',
+            color: 'white',
+            border: 'none',
+            borderRadius: '15px',
+            cursor: 'pointer',
+            boxShadow: '0 6px 12px rgba(176, 43, 58, 0.3)',
+            transition: 'all 0.3s ease',
+            marginTop: '20px',
+            animation: 'fadeInUp 1s ease-out'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 8px 16px rgba(176, 43, 58, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 6px 12px rgba(176, 43, 58, 0.3)';
+          }}
+          onClick={onStart}
+        >
+          Start
+        </button>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideIn {
+          from { 
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to { 
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// --- 생물 만들기 페이지 컴포넌트 ---
+const CreationPage = ({ onBack, keyword, dominantEmoji, dominantKeywords }) => {
+  return (
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'Arial, sans-serif',
+      animation: 'fadeIn 0.5s ease-in-out'
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '20px',
+        padding: '60px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+        maxWidth: '800px',
+        width: '90%'
+      }}>
+        <h1 style={{
+          fontSize: '36px',
+          color: '#B02B3A',
+          marginBottom: '20px',
+          fontWeight: 'bold'
+        }}>
+          "{keyword}"의 감정 생물 만들기
+        </h1>
+        
+        <div style={{
+          fontSize: '80px',
+          marginBottom: '20px'
+        }}>
+          {dominantEmoji}
+        </div>
+
+        <div style={{
+          marginBottom: '30px'
+        }}>
+          <h3 style={{
+            fontSize: '20px',
+            color: '#666',
+            marginBottom: '15px'
+          }}>
+            감정 키워드
+          </h3>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '10px',
+            justifyContent: 'center'
+          }}>
+            {dominantKeywords && dominantKeywords.length > 0 ? (
+              dominantKeywords.map((keyword, index) => (
+                <span key={index} style={{
+                  padding: '8px 16px',
+                  background: '#D2F2E9',
+                  borderRadius: '20px',
+                  fontSize: '16px',
+                  color: '#333'
+                }}>
+                  {keyword}
+                </span>
+              ))
+            ) : (
+              <span style={{ color: '#999', fontSize: '16px' }}>
+                키워드가 없습니다
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <p style={{
+          fontSize: '18px',
+          color: '#666',
+          marginBottom: '40px',
+          lineHeight: '1.6'
+        }}>
+          여기서 감정 생물을 만들어보세요!<br/>
+          아직 개발 중인 페이지입니다.
+        </p>
+
+        <button
+          onClick={onBack}
+          style={{
+            padding: '15px 30px',
+            fontSize: '18px',
+            background: '#B02B3A',
+            color: 'white',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.background = '#8B1E2B';
+            e.target.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background = '#B02B3A';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          돌아가기
+        </button>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 // --- 메인 페이지 컴포넌트: MoodTrackerPage ---
 export default function MoodTrackerPage() {
   const [showLanding, setShowLanding] = useState(true);
@@ -57,6 +400,8 @@ export default function MoodTrackerPage() {
   const [rightColumnKeywords, setRightColumnKeywords] = useState([]);
   const [leftSliderValue, setLeftSliderValue] = useState(3);
   const [rightSliderValue, setRightSliderValue] = useState(7);
+  const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
+  const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
@@ -105,7 +450,45 @@ export default function MoodTrackerPage() {
     setShowLanding(false);
   };
 
+  const handleStartGame = () => {
+    // 슬라이더 값이 더 큰 이모티콘 결정
+    const dominantEmoji = leftSliderValue > rightSliderValue ? leftColumnEmoji : rightColumnEmoji;
+    setIsGameCreationModalOpen(true);
+  };
+
+  const closeGameCreationModal = () => {
+    setIsGameCreationModalOpen(false);
+  };
+
+  const handleStartCreation = () => {
+    // 모달을 닫고 생물 만들기 페이지로 전환
+    setIsGameCreationModalOpen(false);
+    setShowCreationPage(true);
+  };
+
+  const handleBackToMain = () => {
+    // 생물 만들기 페이지에서 메인으로 돌아가기
+    setShowCreationPage(false);
+  };
+
+  // 슬라이더 값이 더 큰 이모티콘 결정
+  const dominantEmoji = leftSliderValue > rightSliderValue ? leftColumnEmoji : rightColumnEmoji;
+  // 우세한 이모티콘의 키워드 가져오기
+  const dominantKeywords = leftSliderValue > rightSliderValue ? leftColumnKeywords : rightColumnKeywords;
+
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
+
+  // 생물 만들기 페이지 표시
+  if (showCreationPage) {
+    return (
+      <CreationPage
+        onBack={handleBackToMain}
+        keyword={userInputText || '감정'}
+        dominantEmoji={dominantEmoji}
+        dominantKeywords={dominantKeywords}
+      />
+    );
+  }
 
   if (showLanding) {
     return (
@@ -212,12 +595,14 @@ export default function MoodTrackerPage() {
           keywords={leftColumnKeywords} 
           sliderValue={leftSliderValue}
           onSliderChange={setLeftSliderValue}
+          onStartGame={handleStartGame}
         />
         <EmotionColumn 
           emoji={rightColumnEmoji} 
           keywords={rightColumnKeywords} 
           sliderValue={rightSliderValue}
           onSliderChange={setRightSliderValue}
+          onStartGame={handleStartGame}
         />
       </div>
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
@@ -265,6 +650,14 @@ export default function MoodTrackerPage() {
         onEmojiSelect={handleEmojiSelection}
         onKeywordUpdate={handleKeywordUpdate}
         existingKeywords={emojiKeywords[selectedEmojiForGameModal] || []}
+      />
+      <GameCreationModal
+        isOpen={isGameCreationModalOpen}
+        keyword={userInputText || '감정'}
+        dominantEmoji={dominantEmoji}
+        dominantKeywords={dominantKeywords}
+        onClose={closeGameCreationModal}
+        onStart={handleStartCreation}
       />
     </FullScreenContainer>
   );
