@@ -181,9 +181,9 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, o
             dominantKeywords.map((keyword, index) => (
               <span key={index} style={{
                 padding: '5px 12px',
-                background: 'rgba(176, 43, 58, 0.1)',
+                
                 borderRadius: '15px',
-                fontSize: '16px'
+                fontSize: '20px'
               }}>
                 {keyword}
               </span>
@@ -199,8 +199,8 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, o
         <button 
           style={{
             padding: '15px 40px',
-            fontSize: '22px',
-            fontWeight: 'bold',
+            fontSize: '25px',
+            fontWeight: 'medium',
             background: '#B02B3A',
             color: 'white',
             border: 'none',
