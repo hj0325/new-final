@@ -5,8 +5,8 @@ import BasketColliders from './BasketColliders';
 function FallingEmojiManager({ 
   leftCount = 0, 
   rightCount = 0, 
-  leftEmojiType = '😀', 
-  rightEmojiType = '😀' 
+  leftEmojiTypes = [], // 배열로 변경
+  rightEmojiTypes = [] // 배열로 변경
 }) {
   const [leftEmojis, setLeftEmojis] = useState([]);
   const [rightEmojis, setRightEmojis] = useState([]);
@@ -24,7 +24,7 @@ function FallingEmojiManager({
   useEffect(() => {
     const currentLeftCount = leftEmojis.length;
     
-    if (leftCount > currentLeftCount) {
+    if (leftCount > currentLeftCount && leftEmojiTypes.length > 0) {
       // 이모티콘 추가 - 하나씩 떨어뜨리기
       const newEmojis = [];
       for (let i = currentLeftCount; i < leftCount; i++) {
@@ -34,11 +34,14 @@ function FallingEmojiManager({
         const randomZ = (Math.random() - 0.5) * 0.05;
         const delay = (i - currentLeftCount) * 200; // 200ms 간격으로 떨어뜨리기
         
+        // 랜덤하게 이모티콘 타입 선택
+        const randomEmojiType = leftEmojiTypes[Math.floor(Math.random() * leftEmojiTypes.length)];
+        
         setTimeout(() => {
           setLeftEmojis(prev => [...prev, {
             id: emojiId,
             position: [randomX, DROP_HEIGHT, randomZ],
-            type: leftEmojiType
+            type: randomEmojiType
           }]);
         }, delay);
       }
@@ -46,13 +49,13 @@ function FallingEmojiManager({
       // 이모티콘 제거
       setLeftEmojis(prev => prev.slice(0, leftCount));
     }
-  }, [leftCount, leftEmojiType]);
+  }, [leftCount, leftEmojiTypes]);
 
   // 우측 이모티콘 개수 변화 감지
   useEffect(() => {
     const currentRightCount = rightEmojis.length;
     
-    if (rightCount > currentRightCount) {
+    if (rightCount > currentRightCount && rightEmojiTypes.length > 0) {
       // 이모티콘 추가 - 하나씩 떨어뜨리기
       for (let i = currentRightCount; i < rightCount; i++) {
         const emojiId = emojiIdCounter.current++;
@@ -61,11 +64,14 @@ function FallingEmojiManager({
         const randomZ = (Math.random() - 0.5) * 0.05;
         const delay = (i - currentRightCount) * 200; // 200ms 간격으로 떨어뜨리기
         
+        // 랜덤하게 이모티콘 타입 선택
+        const randomEmojiType = rightEmojiTypes[Math.floor(Math.random() * rightEmojiTypes.length)];
+        
         setTimeout(() => {
           setRightEmojis(prev => [...prev, {
             id: emojiId,
             position: [randomX, DROP_HEIGHT, randomZ],
-            type: rightEmojiType
+            type: randomEmojiType
           }]);
         }, delay);
       }
@@ -73,7 +79,7 @@ function FallingEmojiManager({
       // 이모티콘 제거
       setRightEmojis(prev => prev.slice(0, rightCount));
     }
-  }, [rightCount, rightEmojiType]);
+  }, [rightCount, rightEmojiTypes]);
 
   return (
     <group>

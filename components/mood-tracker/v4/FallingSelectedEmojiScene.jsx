@@ -28,18 +28,25 @@ const EMOTION_MODEL_PATHS = [
 ];
 EMOTION_MODEL_PATHS.forEach(path => useGLTF.preload(path));
 
-function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight, modelScale }) {
+function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight, modelScale, delay = 0 }) {
   const ref = React.useRef();
   const { scene } = useGLTF(modelPath);
   const clonedScene = React.useMemo(() => scene.clone(), [scene]);
   
   const [isHovered, setIsHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(delay === 0);
   const velocity = useRef({ x: 0, y: 0 });
   const [rotationSpeed] = useState(() => (Math.random() - 0.5) * 0.02);
   const [xPos] = useState(initialX);
+  const startTime = useRef(Date.now());
 
   useFrame((state, delta) => {
-    if (ref.current) {
+    // 지연 시간 처리
+    if (!isVisible && Date.now() - startTime.current > delay) {
+      setIsVisible(true);
+    }
+
+    if (ref.current && isVisible) {
       const currentVel = velocity.current;
       const G_ACCEL = 0.0003;
       const HOVER_SIDE_STRENGTH = 0.15;
@@ -70,6 +77,8 @@ function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight, mo
     }
   });
 
+  if (!isVisible) return null;
+
   return (
     <primitive
       ref={ref}
@@ -85,25 +94,46 @@ function FallingEmotionModel({ modelPath, initialX, initialY, viewportHeight, mo
   );
 }
 
-export function FallingSelectedEmojiScene({ dominantEmoji }) {
+export function FallingSelectedEmojiScene({ dominantEmojis = [] }) {
   const { viewport } = useThree();
   const models = [];
   
-  // 선택된 이모티콘의 모델 경로 가져오기
-  const selectedModelPath = getModelPath(dominantEmoji);
+  // 선택된 이모티콘들의 모델 경로들 가져오기
+  const selectedModelPaths = dominantEmojis.length > 0 
+    ? dominantEmojis.map(emoji => getModelPath(emoji))
+    : ['/models/emotion1.gltf']; // 기본값
 
   for (let i = 0; i < NUM_FALLING_MODELS; i++) {
     const initialModelX = (Math.random() - 0.5) * viewport.width * 1.2;
-    const initialModelY = viewport.height / 2 + FALLING_MODEL_SCALE + (i % (NUM_FALLING_MODELS / 5)) * (FALLING_MODEL_SCALE * 1.8) + Math.random() * FALLING_MODEL_SCALE;
+    
+    // 랜덤하게 모델 경로 선택
+    const randomModelPath = selectedModelPaths[Math.floor(Math.random() * selectedModelPaths.length)];
+    
+    // 즉시 떨어지는 이모티콘들 (30%)
+    let initialModelY, delay;
+    if (i < NUM_FALLING_MODELS * 0.3) {
+      // 즉시 화면에 보이는 이모티콘들 - 화면 중간~위쪽에서 시작
+      initialModelY = (Math.random() * viewport.height * 0.8) + (viewport.height * 0.1);
+      delay = 0;
+    } else if (i < NUM_FALLING_MODELS * 0.7) {
+      // 중간에 많이 떨어지는 이모티콘들 (40%)
+      initialModelY = viewport.height / 2 + FALLING_MODEL_SCALE + Math.random() * FALLING_MODEL_SCALE;
+      delay = Math.random() * 2000 + 1000; // 1-3초 후 시작
+    } else {
+      // 나머지 이모티콘들 (30%)
+      initialModelY = viewport.height / 2 + FALLING_MODEL_SCALE + Math.random() * FALLING_MODEL_SCALE;
+      delay = Math.random() * 4000 + 3000; // 3-7초 후 시작
+    }
 
     models.push(
       <FallingEmotionModel
-        key={`${selectedModelPath}-${i}`}
-        modelPath={selectedModelPath}
+        key={`${randomModelPath}-${i}`}
+        modelPath={randomModelPath}
         initialX={initialModelX}
         initialY={initialModelY}
         viewportHeight={viewport.height}
         modelScale={FALLING_MODEL_SCALE}
+        delay={delay}
       />
     );
   }

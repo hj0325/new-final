@@ -44,21 +44,8 @@ const emojiIdToChar = {
 // function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSliderChange }) { ... }; // Moved
 
 // --- UI 컴포넌트: 게임 생성 모달 ---
-const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, onClose, onStart }) => {
+const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywords, onClose, onStart }) => {
   if (!isOpen) return null;
-
-  // 이모티콘 문자를 모델 경로로 매핑
-  const getModelPath = (emojiType) => {
-    const emojiToModel = {
-      '😀': '/models/emotion1.gltf', // joy
-      '😮': '/models/emotion2.gltf', // surprise
-      '😐': '/models/emotion3.gltf', // neutral
-      '😖': '/models/emotion4.gltf', // sadness
-      '😠': '/models/emotion5.gltf', // anger
-    };
-    
-    return emojiToModel[emojiType] || '/models/emotion1.gltf';
-  };
 
   return (
     <div style={{
@@ -89,7 +76,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, o
             <ambientLight intensity={0.7} />
             <directionalLight position={[0, 10, 10]} intensity={1} />
             <directionalLight position={[0, -10, -5]} intensity={0.3} />
-            <FallingSelectedEmojiScene dominantEmoji={dominantEmoji} />
+            <FallingSelectedEmojiScene dominantEmojis={dominantEmojis} />
           </Suspense>
         </Canvas>
       </div>
@@ -139,14 +126,25 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, o
           ×
         </button>
 
-        {/* 우세한 이모티콘 표시 */}
+        {/* 우세한 이모티콘들 표시 */}
         <div style={{
-          fontSize: '120px',
+          fontSize: dominantEmojis.length > 1 ? '80px' : '120px',
           marginBottom: '10px',
           textShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          animation: 'bounce 2s ease-in-out infinite'
+          animation: 'bounce 2s ease-in-out infinite',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: dominantEmojis.length > 1 ? '10px' : '0'
         }}>
-          {dominantEmoji}
+          {dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
+            <span key={index} style={{
+              fontSize: dominantEmojis.length > 3 ? '60px' : dominantEmojis.length > 1 ? '80px' : '120px'
+            }}>
+              {emoji}
+            </span>
+          )) : '😀'}
         </div>
 
         {/* 메인 문구 */}
@@ -159,7 +157,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, o
           lineHeight: '1.4',
           animation: 'fadeInUp 0.6s ease-out'
         }}>
-          "{keyword}"의 감정 생물을 만들어 보아요!
+          오늘의 감정 생물을 만들어 보아요!
         </h1>
 
         {/* 키워드 표시 */}
@@ -273,7 +271,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, dominantKeywords, o
 };
 
 // --- 생물 만들기 페이지 컴포넌트 ---
-const CreationPage = ({ onBack, keyword, dominantEmoji, dominantKeywords }) => {
+const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => {
   return (
     <div style={{
       width: '100vw',
@@ -302,12 +300,10 @@ export default function MoodTrackerPage() {
   const [selectedEmojiForGameModal, setSelectedEmojiForGameModal] = useState(null);
   const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false);
   const [userInputText, setUserInputText] = useState('');
-  const [leftColumnEmoji, setLeftColumnEmoji] = useState('');
-  const [rightColumnEmoji, setRightColumnEmoji] = useState('');
-  const [selectionCount, setSelectionCount] = useState(0);
-  const [emojiKeywords, setEmojiKeywords] = useState({});
-  const [leftColumnKeywords, setLeftColumnKeywords] = useState([]);
-  const [rightColumnKeywords, setRightColumnKeywords] = useState([]);
+  const [positiveEmojis, setPositiveEmojis] = useState([]); // 긍정 이모티콘들
+  const [negativeEmojis, setNegativeEmojis] = useState([]); // 부정 이모티콘들
+  const [positiveKeywords, setPositiveKeywords] = useState([]); // 긍정 키워드들
+  const [negativeKeywords, setNegativeKeywords] = useState([]); // 부정 키워드들
   const [leftSliderValue, setLeftSliderValue] = useState(3);
   const [rightSliderValue, setRightSliderValue] = useState(7);
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
@@ -330,25 +326,19 @@ export default function MoodTrackerPage() {
     setSelectedEmojiForGameModal(null);
   };
 
-  const handleEmojiSelection = (emoji, keywords) => {
-    if (selectionCount === 0) {
-      setLeftColumnEmoji(emoji);
-      setLeftColumnKeywords(keywords || []);
-      setSelectionCount(1);
-    } else if (selectionCount === 1) {
-      setRightColumnEmoji(emoji);
-      setRightColumnKeywords(keywords || []);
-      setSelectionCount(2);
+  const handleEmojiSelection = (emoji, keywords, type) => {
+    if (type === 'positive') {
+      setPositiveEmojis(prev => [...prev, emoji]);
+      setPositiveKeywords(prev => [...prev, ...keywords]);
+    } else if (type === 'negative') {
+      setNegativeEmojis(prev => [...prev, emoji]);
+      setNegativeKeywords(prev => [...prev, ...keywords]);
     }
-    // 2개 선택 후에는 더 이상 변경하지 않음
     closeGameModal();
   };
 
   const handleKeywordUpdate = (emoji, keywords) => {
-    setEmojiKeywords(prev => ({
-      ...prev,
-      [emoji]: keywords
-    }));
+    // 키워드 업데이트 기능 (필요시 구현)
   };
 
   const handlePlayClick = () => {
@@ -361,8 +351,6 @@ export default function MoodTrackerPage() {
   };
 
   const handleStartGame = () => {
-    // 슬라이더 값이 더 큰 이모티콘 결정
-    const dominantEmoji = leftSliderValue > rightSliderValue ? leftColumnEmoji : rightColumnEmoji;
     setIsGameCreationModalOpen(true);
   };
 
@@ -371,30 +359,29 @@ export default function MoodTrackerPage() {
   };
 
   const handleStartCreation = () => {
-    // 모달을 닫고 생물 만들기 페이지로 전환
     setIsGameCreationModalOpen(false);
     setShowCreationPage(true);
   };
 
   const handleBackToMain = () => {
-    // 생물 만들기 페이지에서 메인으로 돌아가기
     setShowCreationPage(false);
   };
 
-  // 슬라이더 값이 더 큰 이모티콘 결정
-  const dominantEmoji = leftSliderValue > rightSliderValue ? leftColumnEmoji : rightColumnEmoji;
-  // 우세한 이모티콘의 키워드 가져오기
-  const dominantKeywords = leftSliderValue > rightSliderValue ? leftColumnKeywords : rightColumnKeywords;
+  // 우세한 이모티콘들 결정 (배열로 변경)
+  const dominantEmojis = leftSliderValue > rightSliderValue ? positiveEmojis : negativeEmojis;
+  
+  // 우세한 키워드 가져오기
+  const dominantKeywords = leftSliderValue > rightSliderValue ? positiveKeywords : negativeKeywords;
 
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
 
-  // 생물 만들기 페이지 표시
+  // Implementation of showCreationPage
   if (showCreationPage) {
     return (
       <CreationPage
         onBack={handleBackToMain}
         keyword={userInputText || '감정'}
-        dominantEmoji={dominantEmoji}
+        dominantEmojis={dominantEmojis}
         dominantKeywords={dominantKeywords}
       />
     );
@@ -447,8 +434,8 @@ export default function MoodTrackerPage() {
         <button
           onClick={handlePlayClick}
           style={{
-            padding: '50px 100px',
-            fontSize: '60px',
+            padding: '30px 60px',
+            fontSize: '36px',
             cursor: 'pointer',
             background: 'white',
             color: '#B02B3A',
@@ -501,15 +488,15 @@ export default function MoodTrackerPage() {
       )}
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
         <EmotionColumn 
-          emoji={leftColumnEmoji} 
-          keywords={leftColumnKeywords} 
+          emojis={positiveEmojis} 
+          keywords={positiveKeywords} 
           sliderValue={leftSliderValue}
           onSliderChange={setLeftSliderValue}
           onStartGame={handleStartGame}
         />
         <EmotionColumn 
-          emoji={rightColumnEmoji} 
-          keywords={rightColumnKeywords} 
+          emojis={negativeEmojis} 
+          keywords={negativeKeywords} 
           sliderValue={rightSliderValue}
           onSliderChange={setRightSliderValue}
           onStartGame={handleStartGame}
@@ -544,10 +531,10 @@ export default function MoodTrackerPage() {
                 onEmojiClick={handleEmoji3DClick} 
                 />
               <FallingEmojiManager
-                leftCount={leftColumnEmoji ? leftSliderValue : 0}
-                rightCount={rightColumnEmoji ? rightSliderValue : 0}
-                leftEmojiType={leftColumnEmoji}
-                rightEmojiType={rightColumnEmoji}
+                leftCount={positiveEmojis.length > 0 ? leftSliderValue : 0}
+                rightCount={negativeEmojis.length > 0 ? rightSliderValue : 0}
+                leftEmojiTypes={positiveEmojis}
+                rightEmojiTypes={negativeEmojis}
               />
             </Physics>
           </Suspense>
@@ -559,12 +546,12 @@ export default function MoodTrackerPage() {
         onClose={closeGameModal} 
         onEmojiSelect={handleEmojiSelection}
         onKeywordUpdate={handleKeywordUpdate}
-        existingKeywords={emojiKeywords[selectedEmojiForGameModal] || []}
+        existingKeywords={[]}
       />
       <GameCreationModal
         isOpen={isGameCreationModalOpen}
         keyword={userInputText || '감정'}
-        dominantEmoji={dominantEmoji}
+        dominantEmojis={dominantEmojis}
         dominantKeywords={dominantKeywords}
         onClose={closeGameCreationModal}
         onStart={handleStartCreation}

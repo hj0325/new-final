@@ -50,14 +50,14 @@ const GameModal = ({ isOpen, emoji, onClose, onEmojiSelect, onKeywordUpdate, exi
       zIndex: 1000,
     }}>
       <span style={{ fontSize: '100px', marginBottom: '0px' }}>{emoji}</span>
-      <h2 style={{ textAlign: 'center', marginTop: '0px', marginBottom: '10px', fontSize: '22px' }}>나의 감정 키워드</h2>
+      <h2 style={{ textAlign: 'center', marginTop: '0px', marginBottom: '10px', fontSize: '22px' }}>오늘의 감정 이유</h2>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '90%', marginBottom:'10px' }}>
         <input 
           type="text"
           value={currentKeywordInput}
           onChange={(e) => setCurrentKeywordInput(e.target.value)}
-          placeholder="키워드 입력"
+          placeholder="선택 이유"
           style={{
             flexGrow: 1,
             padding: '10px 15px',
@@ -108,7 +108,7 @@ const GameModal = ({ isOpen, emoji, onClose, onEmojiSelect, onKeywordUpdate, exi
         )}
       </div>
       <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
-        <button onClick={onClose} style={{
+        <button onClick={() => onEmojiSelect && onEmojiSelect(emoji, userKeywords, 'positive')} style={{
           padding: '10px 20px',
           fontSize: '16px',
           cursor: 'pointer',
@@ -117,9 +117,9 @@ const GameModal = ({ isOpen, emoji, onClose, onEmojiSelect, onKeywordUpdate, exi
           border: 'none',
           borderRadius: '5px'
         }}>
-          닫기
+          긍정
         </button>
-        <button onClick={() => onEmojiSelect && onEmojiSelect(emoji, userKeywords)} style={{
+        <button onClick={() => onEmojiSelect && onEmojiSelect(emoji, userKeywords, 'negative')} style={{
           padding: '10px 20px',
           fontSize: '16px',
           cursor: 'pointer',
@@ -128,7 +128,7 @@ const GameModal = ({ isOpen, emoji, onClose, onEmojiSelect, onKeywordUpdate, exi
           border: 'none',
           borderRadius: '5px'
         }}>
-          선택
+          부정
         </button>
       </div>
     </div>

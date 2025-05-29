@@ -1,6 +1,11 @@
 import React from 'react';
 
-function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 5, onSliderChange, onStartGame }) {
+function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderChange, onStartGame }) {
+  // 이모티콘 개수에 따른 박스 높이 계산
+  const baseHeight = 90; // 기본 높이
+  const emojiHeight = 65; // 이모티콘당 높이
+  const dynamicHeight = baseHeight + (Math.max(0, emojis.length - 1) * emojiHeight);
+  
   return (
     <div style={{
       width: 260,
@@ -35,10 +40,29 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 5, onSlide
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '18px 0 18px 0',
-        marginBottom: 30
+        padding: '18px 0',
+        marginBottom: 30,
+        minHeight: dynamicHeight
       }}>
-        <div style={{ fontSize: 60, marginBottom: 10, minHeight: 72 }}>{emoji || ''}</div>
+        <div style={{ 
+          fontSize: 60, // 기존 크기 유지
+          marginBottom: 10, 
+          minHeight: emojis.length > 0 ? (emojis.length * 65) : 72,
+          display: 'flex',
+          flexDirection: 'column', // 세로 배치
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0px'
+        }}>
+          {emojis.length > 0 ? emojis.map((emoji, index) => (
+            <span key={index} style={{ 
+              fontSize: 60, // 모든 이모티콘 기존 크기 유지
+              lineHeight: '65px'
+            }}>
+              {emoji}
+            </span>
+          )) : ''}
+        </div>
         <div 
           style={{ 
             width: '80%', 

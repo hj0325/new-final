@@ -31,12 +31,12 @@ const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }
       zIndex: 1001,
     }}>
       <h2 style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px', fontSize: '30px', color: '#333' }}>
-        오늘의 무게 단어
+        오늘 너의 감정은 어땠어?
       </h2>
       <textarea
         value={currentText}
         onChange={(e) => onTextChange(e.target.value)}
-        placeholder="단어 입력"
+        placeholder="날짜 입력"
         style={{
           width: '90%',
           height: '100px',
