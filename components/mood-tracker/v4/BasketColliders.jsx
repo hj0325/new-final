@@ -1,59 +1,76 @@
 import React from 'react';
 import { RigidBody } from '@react-three/rapier';
+import { useControls } from 'leva';
 
 function BasketColliders() {
-  // 저울 바구니 위치 (실제 저울 좌표에 맞춤)
-  const LEFT_BASKET_X = -0.38 * 1.9; // 실제 좌측 날개 위치
-  const RIGHT_BASKET_X = 0.38 * 1.9; // 실제 우측 날개 위치
-  const BASKET_Y = (0.5 + 0.2) * 1.9; // bodyProps.position.y + 날개 상대위치.y * scale
-  const BASKET_RADIUS = 0.4; // 실제 저울 날개 크기에 맞춤
-  const BASKET_HEIGHT = 0.3; // 바구니 깊이
+  // 바구니 충돌체 설정을 실시간으로 조정
+  const {
+    leftBasketX,
+    rightBasketX,
+    basketY,
+    basketRadius,
+    basketHeight,
+    basketWallThickness,
+    showColliders
+  } = useControls('Basket Colliders', {
+    leftBasketX: { value: -0.38 * 1.9, min: -3, max: 0, step: 0.01 },
+    rightBasketX: { value: 0.38 * 1.9, min: 0, max: 3, step: 0.01 },
+    basketY: { value: (0.5 + 0.2) * 1.9, min: 0, max: 5, step: 0.01 },
+    basketRadius: { value: 0.4, min: 0.1, max: 1, step: 0.01 },
+    basketHeight: { value: 0.3, min: 0.1, max: 1, step: 0.01 },
+    basketWallThickness: { value: 0.05, min: 0.01, max: 0.2, step: 0.01 },
+    showColliders: { value: false }
+  });
 
   return (
     <group>
       {/* 좌측 바구니 충돌체 */}
       <RigidBody 
         type="fixed" 
-        position={[LEFT_BASKET_X, BASKET_Y, 0]}
+        position={[leftBasketX, basketY, 0]}
         colliders="trimesh"
       >
         {/* 바구니 바닥 */}
-        <mesh visible={false}>
-          <cylinderGeometry args={[BASKET_RADIUS, BASKET_RADIUS, 0.1]} />
+        <mesh visible={showColliders}>
+          <cylinderGeometry args={[basketRadius, basketRadius, 0.1]} />
+          {showColliders && <meshBasicMaterial color="red" transparent opacity={0.5} />}
         </mesh>
       </RigidBody>
       
       {/* 좌측 바구니 벽 (실린더 벽) */}
       <RigidBody 
         type="fixed" 
-        position={[LEFT_BASKET_X, BASKET_Y + BASKET_HEIGHT/2, 0]}
+        position={[leftBasketX, basketY + basketHeight/2, 0]}
         colliders="trimesh"
       >
-        <mesh visible={false}>
-          <cylinderGeometry args={[BASKET_RADIUS + 0.05, BASKET_RADIUS + 0.05, BASKET_HEIGHT, 16, 1, true]} />
+        <mesh visible={showColliders}>
+          <cylinderGeometry args={[basketRadius + basketWallThickness, basketRadius + basketWallThickness, basketHeight, 16, 1, true]} />
+          {showColliders && <meshBasicMaterial color="red" transparent opacity={0.3} />}
         </mesh>
       </RigidBody>
 
       {/* 우측 바구니 충돌체 */}
       <RigidBody 
         type="fixed" 
-        position={[RIGHT_BASKET_X, BASKET_Y, 0]}
+        position={[rightBasketX, basketY, 0]}
         colliders="trimesh"
       >
         {/* 바구니 바닥 */}
-        <mesh visible={false}>
-          <cylinderGeometry args={[BASKET_RADIUS, BASKET_RADIUS, 0.1]} />
+        <mesh visible={showColliders}>
+          <cylinderGeometry args={[basketRadius, basketRadius, 0.1]} />
+          {showColliders && <meshBasicMaterial color="blue" transparent opacity={0.5} />}
         </mesh>
       </RigidBody>
       
       {/* 우측 바구니 벽 (실린더 벽) */}
       <RigidBody 
         type="fixed" 
-        position={[RIGHT_BASKET_X, BASKET_Y + BASKET_HEIGHT/2, 0]}
+        position={[rightBasketX, basketY + basketHeight/2, 0]}
         colliders="trimesh"
       >
-        <mesh visible={false}>
-          <cylinderGeometry args={[BASKET_RADIUS + 0.05, BASKET_RADIUS + 0.05, BASKET_HEIGHT, 16, 1, true]} />
+        <mesh visible={showColliders}>
+          <cylinderGeometry args={[basketRadius + basketWallThickness, basketRadius + basketWallThickness, basketHeight, 16, 1, true]} />
+          {showColliders && <meshBasicMaterial color="blue" transparent opacity={0.3} />}
         </mesh>
       </RigidBody>
 
@@ -63,8 +80,9 @@ function BasketColliders() {
         position={[0, -2, 0]}
         colliders="cuboid"
       >
-        <mesh visible={false}>
+        <mesh visible={showColliders}>
           <boxGeometry args={[20, 0.1, 20]} />
+          {showColliders && <meshBasicMaterial color="gray" transparent opacity={0.3} />}
         </mesh>
       </RigidBody>
     </group>

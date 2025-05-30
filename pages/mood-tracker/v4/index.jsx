@@ -308,6 +308,10 @@ export default function MoodTrackerPage() {
   const [rightSliderValue, setRightSliderValue] = useState(7);
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
   const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
+  
+  // 실제로 바구니에 떨어진 이모티콘 개수 추적
+  const [actualLeftCount, setActualLeftCount] = useState(0);
+  const [actualRightCount, setActualRightCount] = useState(0);
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
@@ -367,11 +371,25 @@ export default function MoodTrackerPage() {
     setShowCreationPage(false);
   };
 
+  // 이모티콘이 바구니에 도달했을 때 처리하는 함수
+  const handleEmojiLanded = (landedInfo) => {
+    const { emojiType, basket, position } = landedInfo;
+    
+    console.log(`${emojiType} landed in ${basket} basket at position:`, position);
+    
+    // 실제 바구니에 떨어진 개수 증가
+    if (basket === 'left') {
+      setActualLeftCount(prev => prev + 1);
+    } else if (basket === 'right') {
+      setActualRightCount(prev => prev + 1);
+    }
+  };
+
   // 우세한 이모티콘들 결정 (배열로 변경)
-  const dominantEmojis = leftSliderValue > rightSliderValue ? positiveEmojis : negativeEmojis;
+  const dominantEmojis = actualLeftCount > actualRightCount ? positiveEmojis : negativeEmojis;
   
   // 우세한 키워드 가져오기
-  const dominantKeywords = leftSliderValue > rightSliderValue ? positiveKeywords : negativeKeywords;
+  const dominantKeywords = actualLeftCount > actualRightCount ? positiveKeywords : negativeKeywords;
 
   const keywords = ['기쁨', '즐거움', '행복함', '밝음', '신남', '부드러움', '통통튀는', '화창한'];
 
@@ -535,6 +553,7 @@ export default function MoodTrackerPage() {
                 rightCount={negativeEmojis.length > 0 ? rightSliderValue : 0}
                 leftEmojiTypes={positiveEmojis}
                 rightEmojiTypes={negativeEmojis}
+                onEmojiLanded={handleEmojiLanded}
               />
             </Physics>
           </Suspense>
