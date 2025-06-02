@@ -25,9 +25,9 @@ function FallingEmojiManager({
     randomZRange,
     dropDelay
   } = useControls('Emoji Drop Settings', {
-    leftBasketX: { value: -2.0, min: -3, max: 0, step: 0.01 },
-    rightBasketX: { value: 1.15, min: 0, max: 3, step: 0.01 },
-    basketY: { value: 0.37, min: 0, max: 5, step: 0.01 },
+    leftBasketX: { value: -0.38 * 1.9, min: -3, max: 0, step: 0.01 },
+    rightBasketX: { value: 0.38 * 1.9, min: 0, max: 3, step: 0.01 },
+    basketY: { value: (0.5 + 0.2) * 1.9, min: 0, max: 5, step: 0.01 },
     dropHeight: { value: 6.3, min: 3, max: 15, step: 0.1 },
     emojiScale: { value: 0.99, min: 0.1, max: 2, step: 0.01 },
     randomXRange: { value: 0.05, min: 0, max: 0.5, step: 0.01 },

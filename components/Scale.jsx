@@ -15,6 +15,7 @@ export default function Scale({
   wingsRightProps = { position: [0.38, 0.2, 0], scale: 1, rotation: [0, 0, 0] },
   wingsLeftPrimitiveOffset = [0, 0, 0],
   wingsRightPrimitiveOffset = [0, 0, 0],
+  tiltAngle = 0,
   tiltAngleLeft = Math.PI / 18,
   tiltAngleRight = Math.PI / 18,
   animationSpeedLeft = 0.08,
@@ -40,6 +41,23 @@ export default function Scale({
   const bodyColliderArgs = [0.5, 0.75, 0.5];
   const wingColliderArgs = [0.7, 0.1, 0.5];
 
+  // 슬라이더 값에 따른 날개 Y 위치 계산
+  const maxVerticalMovement = 0.3; // 최대 수직 이동 거리
+  const leftWingYOffset = tiltAngle * maxVerticalMovement; // tiltAngle이 음수면 왼쪽이 아래로
+  const rightWingYOffset = -tiltAngle * maxVerticalMovement; // tiltAngle이 양수면 오른쪽이 아래로
+
+  const adjustedLeftWingsPosition = [
+    wingsLeftProps.position[0], 
+    wingsLeftProps.position[1] + leftWingYOffset, 
+    wingsLeftProps.position[2]
+  ];
+  
+  const adjustedRightWingsPosition = [
+    wingsRightProps.position[0], 
+    wingsRightProps.position[1] + rightWingYOffset, 
+    wingsRightProps.position[2]
+  ];
+
   return (
     <group
       ref={groupRef}
@@ -59,7 +77,7 @@ export default function Scale({
       <RigidBody 
         type="fixed" 
         colliders={false} 
-        position={wingsLeftProps.position}
+        position={adjustedLeftWingsPosition}
         scale={wingsLeftProps.scale}
         rotation={wingsLeftProps.rotation}
         name="scale-wing-left"
@@ -72,7 +90,7 @@ export default function Scale({
       <RigidBody 
         type="fixed" 
         colliders={false} 
-        position={wingsRightProps.position}
+        position={adjustedRightWingsPosition}
         scale={wingsRightProps.scale}
         rotation={wingsRightProps.rotation}
         name="scale-wing-right"

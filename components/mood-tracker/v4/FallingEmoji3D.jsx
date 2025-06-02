@@ -58,9 +58,9 @@ function FallingEmoji3D({
     basketRadius,
     disappearDuration
   } = useControls('Collision Detection', {
-    leftBasketX: { value: -2.0, min: -3, max: 0, step: 0.01 },
-    rightBasketX: { value: 1.15, min: 0, max: 3, step: 0.01 },
-    basketY: { value: 0.37, min: 0, max: 5, step: 0.01 },
+    leftBasketX: { value: -0.38 * 1.9, min: -3, max: 0, step: 0.01 },
+    rightBasketX: { value: 0.38 * 1.9, min: 0, max: 3, step: 0.01 },
+    basketY: { value: (0.5 + 0.2) * 1.9, min: 0, max: 5, step: 0.01 },
     basketRadius: { value: 0.4, min: 0.1, max: 1, step: 0.01 },
     disappearDuration: { value: 1000, min: 200, max: 3000, step: 100 }
   });
@@ -70,8 +70,8 @@ function FallingEmoji3D({
       const position = rigidBodyRef.current.translation();
       
       // 바구니 충돌 감지
-      const isInLeftBasket = Math.abs(position.x - leftBasketX) < basketRadius && position.y <= basketY + 0.2;
-      const isInRightBasket = Math.abs(position.x - rightBasketX) < basketRadius && position.y <= basketY + 0.2;
+      const isInLeftBasket = Math.abs(position.x - leftBasketX) < basketRadius && position.y <= basketY + 0.5;
+      const isInRightBasket = Math.abs(position.x - rightBasketX) < basketRadius && position.y <= basketY + 0.5;
       
       if (isInLeftBasket || isInRightBasket) {
         setIsDisappearing(true);

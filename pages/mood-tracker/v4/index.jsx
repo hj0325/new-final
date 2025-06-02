@@ -313,6 +313,21 @@ export default function MoodTrackerPage() {
   const [actualLeftCount, setActualLeftCount] = useState(0);
   const [actualRightCount, setActualRightCount] = useState(0);
 
+  // 슬라이더 값에 따른 저울 기울기 계산
+  const calculateTiltAngle = () => {
+    const difference = rightSliderValue - leftSliderValue;
+    const maxTilt = Math.PI / 8; // 최대 기울기 각도를 좀 더 크게 (22.5도)
+    const normalizedDifference = difference / 10; // 슬라이더는 0-10 범위이므로
+    const tiltAngle = normalizedDifference * maxTilt;
+    
+    // 디버깅용 로그 (나중에 제거 가능)
+    console.log(`Left: ${leftSliderValue}, Right: ${rightSliderValue}, Difference: ${difference}, TiltAngle: ${tiltAngle}`);
+    
+    return tiltAngle; // 양수면 오른쪽으로 기울어짐, 음수면 왼쪽으로 기울어짐
+  };
+
+  const dynamicTiltAngle = calculateTiltAngle();
+
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
   const wingsPrimitiveOffset = [0, 0, 0];
@@ -542,7 +557,7 @@ export default function MoodTrackerPage() {
               bodyProps={bodyProps}
               wingsProps={wingsProps}
               wingsPrimitiveOffset={wingsPrimitiveOffset}
-              tiltAngle={Math.PI / 20}
+              tiltAngle={dynamicTiltAngle}
               verticalMovementFactor={0.03}
             />
               <EmojiSelector3D 
