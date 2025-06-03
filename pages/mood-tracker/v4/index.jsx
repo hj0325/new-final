@@ -86,7 +86,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
         height: '70vh',
         maxWidth: '800px',
         maxHeight: '600px',
-        background: 'url(/window.png) center/cover no-repeat',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
         border: '3px solid #B02B3A',
         borderRadius: '20px',
         boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
