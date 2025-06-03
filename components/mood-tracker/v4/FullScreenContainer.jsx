@@ -9,7 +9,7 @@ const FullScreenContainer = ({ children }) => (
     justifyContent: 'center',
     gap: '10px',
     alignItems: 'center',
-    background: '#ffffff',
+    background: 'url(/second.jpg) center/cover no-repeat',
     overflow: 'hidden',
     position: 'relative'
   }}>
