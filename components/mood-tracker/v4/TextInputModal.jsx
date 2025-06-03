@@ -8,6 +8,20 @@ const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }
     onClose();
   };
 
+  // Convert current text to date format if it's already a date, otherwise use today
+  const getDefaultDate = () => {
+    if (currentText && currentText.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return currentText;
+    }
+    return new Date().toISOString().split('T')[0];
+  };
+
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value;
+    // Format the date to show it nicely (optional: you can change this format)
+    onTextChange(selectedDate);
+  };
+
   return (
     <div style={{
       position: 'fixed',
@@ -33,10 +47,10 @@ const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }
       <h2 style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px', fontSize: '30px', color: '#333' }}>
         오늘 너의 감정은 어땠어?
       </h2>
-      <textarea
-        value={currentText}
-        onChange={(e) => onTextChange(e.target.value)}
-        placeholder="날짜 입력"
+      <input
+        type="date"
+        value={currentText || getDefaultDate()}
+        onChange={handleDateChange}
         style={{
           width: '90%',
           height: '100px',
@@ -44,9 +58,10 @@ const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }
           fontSize: '30px',
           borderRadius: '8px',
           border: '1px solid #ccc',
-          resize: 'none',
           boxSizing: 'border-box',
           textAlign: 'center',
+          cursor: 'pointer',
+          backgroundColor: 'white'
         }}
       />
       <button onClick={handleSubmit} style={{

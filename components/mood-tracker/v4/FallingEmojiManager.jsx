@@ -31,7 +31,7 @@ function FallingEmojiManager({
     dropHeight: { value: 6.3, min: 3, max: 15, step: 0.1 },
     emojiScale: { value: 0.99, min: 0.1, max: 2, step: 0.01 },
     randomXRange: { value: 0.05, min: 0, max: 0.5, step: 0.01 },
-    randomZRange: { value: 0.10, min: 0, max: 0.5, step: 0.01 },
+    randomZRange: { value: 0.02, min: 0, max: 0.5, step: 0.01 },
     dropDelay: { value: 200, min: 50, max: 1000, step: 10 }
   });
 
