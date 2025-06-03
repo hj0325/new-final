@@ -32,7 +32,7 @@ const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }
       height: '60vh',
       maxWidth: '600px',
       maxHeight: '400px',
-      backgroundColor: 'rgba(255, 255, 255, 0.90)',
+      background: 'url(/window.png) center/cover no-repeat',
       border: '2px solid #eee',
       borderRadius: '10px',
       boxShadow: '0 8px 13px rgba(0, 0, 0, 0.71)',

@@ -1,6 +1,6 @@
-import React, { useState, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Environment, OrthographicCamera } from '@react-three/drei';
+import React, { useState, Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Environment, OrthographicCamera, useGLTF } from '@react-three/drei';
 import { Physics } from '@react-three/rapier';
 import FullScreenContainer from '../../../components/mood-tracker/v4/FullScreenContainer';
 import GameModal from '../../../components/mood-tracker/v4/GameModal';
@@ -86,7 +86,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
         height: '70vh',
         maxWidth: '800px',
         maxHeight: '600px',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        background: 'url(/window.png) center/cover no-repeat',
         border: '3px solid #B02B3A',
         borderRadius: '20px',
         boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
@@ -270,6 +270,31 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
   );
 };
 
+// Float효과를 위한 3D 모델 컴포넌트
+const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02, floatAmplitude = 0.5 }) => {
+  const mesh = useRef();
+  const { scene } = useGLTF(url);
+  
+  useFrame((state) => {
+    if (mesh.current) {
+      // 둥실거리는 효과
+      mesh.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * floatSpeed) * floatAmplitude;
+      // 회전 효과
+      mesh.current.rotation.y += rotationSpeed;
+      mesh.current.rotation.x += rotationSpeed * 0.5;
+    }
+  });
+
+  return (
+    <primitive 
+      ref={mesh} 
+      object={scene.clone()} 
+      position={position} 
+      scale={[0.8, 0.8, 0.8]}
+    />
+  );
+};
+
 // --- 생물 만들기 페이지 컴포넌트 ---
 const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => {
   return (
@@ -289,6 +314,49 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
           to { opacity: 1; }
         }
       `}</style>
+      
+      {/* 3D 씬 */}
+      <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
+        <Suspense fallback={null}>
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[10, 10, 5]} intensity={1} />
+          <directionalLight position={[-10, -10, -5]} intensity={0.3} />
+          
+          {/* 4개의 3D 모델들을 중앙 주변에 배치 */}
+          <FloatingModel 
+            url="/box.gltf" 
+            position={[-4, 0, 0]} 
+            rotationSpeed={0.008}
+            floatSpeed={0.015}
+            floatAmplitude={0.3}
+            scale={[5,5,5]}
+          />
+          <FloatingModel 
+            url="/clinder.gltf" 
+            position={[-1.3, 0, 0]} 
+            rotationSpeed={0.012}
+            floatSpeed={0.02}
+            floatAmplitude={0.4}
+            scale={[5,5,5]}
+          />
+          <FloatingModel 
+            url="/hexagon.gltf" 
+            position={[1.3, 0, 0]} 
+            rotationSpeed={0.01}
+            floatSpeed={0.018}
+            floatAmplitude={0.35}
+            scale={[5,5,5]}
+          />
+          <FloatingModel 
+            url="/star.gltf" 
+            position={[4, 0, 0]} 
+            rotationSpeed={0.015}
+            floatSpeed={0.025}
+            floatAmplitude={0.45}
+            scale={[5,5,5]}
+          />
+        </Suspense>
+      </Canvas>
     </div>
   );
 };
@@ -427,31 +495,11 @@ export default function MoodTrackerPage() {
         height: '100vh',
         display: 'flex',
         alignItems: 'center',
-        background: '#B02B3A',
+        background: 'url(/first.png) center/cover no-repeat',
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{
-          position: 'absolute',
-          top: '80px',
-          left: 0,
-          width: '100%',
-          height: '20vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1,
-          color: 'rgba(255, 255, 255, 0.66)',
-          fontSize: 'calc(min(30vw, 35vh))',
-          fontWeight: 'bold',
-          fontFamily: 'Arial, sans-serif',
-          textAlign: 'center',
-          pointerEvents: 'none',
-          textTransform: 'uppercase'
-        }}>
-          MoMo
-        </div>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
           <Canvas>
             <OrthographicCamera
