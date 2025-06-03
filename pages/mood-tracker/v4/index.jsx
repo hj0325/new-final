@@ -271,7 +271,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
 };
 
 // Float효과를 위한 3D 모델 컴포넌트
-const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02, floatAmplitude = 0.5 }) => {
+const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02, floatAmplitude = 0.5, scale = [0.8, 0.8, 0.8] }) => {
   const mesh = useRef();
   const { scene } = useGLTF(url);
   
@@ -290,7 +290,7 @@ const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02,
       ref={mesh} 
       object={scene.clone()} 
       position={position} 
-      scale={[0.8, 0.8, 0.8]}
+      scale={scale}
     />
   );
 };
@@ -301,12 +301,13 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
     <div style={{
       width: '100vw',
       height: '100vh',
-      background: 'white',
+      background: 'url(/second.jpg) center/cover no-repeat',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: 'Arial, sans-serif',
-      animation: 'fadeIn 0.5s ease-in-out'
+      animation: 'fadeIn 0.5s ease-in-out',
+      position: 'relative'
     }}>
       <style jsx>{`
         @keyframes fadeIn {
@@ -314,6 +315,65 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
           to { opacity: 1; }
         }
       `}</style>
+      
+      {/* 상단에 우세한 이모티콘과 키워드 표시 */}
+      <div style={{
+        position: 'absolute',
+        top: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: '15px',
+        padding: '20px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: 100,
+        textAlign: 'center',
+        minWidth: '300px',
+        maxWidth: '80%'
+      }}>
+        {/* 우세한 이모티콘 표시 */}
+        <div style={{
+          fontSize: '60px',
+          marginBottom: '10px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '10px',
+          flexWrap: 'wrap'
+        }}>
+          {dominantEmojis && dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
+            <span key={index}>{emoji}</span>
+          )) : '😀'}
+        </div>
+        
+        {/* 키워드 표시 */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          {dominantKeywords && dominantKeywords.length > 0 ? (
+            dominantKeywords.map((keyword, index) => (
+              <span key={index} style={{
+                padding: '5px 12px',
+                background: '#D2F2E9',
+                borderRadius: '15px',
+                fontSize: '16px',
+                fontWeight: '500',
+                color: '#333'
+              }}>
+                {keyword}
+              </span>
+            ))
+          ) : (
+            <span style={{ color: '#666', fontSize: '14px' }}>
+              감정 키워드가 없습니다
+            </span>
+          )}
+        </div>
+      </div>
       
       {/* 3D 씬 */}
       <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
@@ -329,7 +389,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             rotationSpeed={0.008}
             floatSpeed={0.015}
             floatAmplitude={0.3}
-            scale={[5,5,5]}
+            scale={[1,1,1]}
           />
           <FloatingModel 
             url="/clinder.gltf" 
@@ -337,7 +397,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             rotationSpeed={0.012}
             floatSpeed={0.02}
             floatAmplitude={0.4}
-            scale={[5,5,5]}
+            scale={[1,1,1]}
           />
           <FloatingModel 
             url="/hexagon.gltf" 
@@ -345,7 +405,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             rotationSpeed={0.01}
             floatSpeed={0.018}
             floatAmplitude={0.35}
-            scale={[5,5,5]}
+            scale={[1,1,1]}
           />
           <FloatingModel 
             url="/star.gltf" 
@@ -353,7 +413,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             rotationSpeed={0.015}
             floatSpeed={0.025}
             floatAmplitude={0.45}
-            scale={[5,5,5]}
+            scale={[1,1,1]}
           />
         </Suspense>
       </Canvas>
