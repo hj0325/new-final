@@ -24,6 +24,11 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/mood-tracker/v4.js"
+    ],
+    "/mood-tracker/v5": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/mood-tracker/v5.js"
     ]
   },
   "ampFirstPages": []
