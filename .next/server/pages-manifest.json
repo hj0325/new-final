@@ -1,14 +1,7 @@
 {
   "/_app": "pages/_app.js",
-  "/": "pages/index.html",
-  "/mood-tracker copy": "pages/mood-tracker copy.html",
-  "/mood-tracker": "pages/mood-tracker.html",
-  "/mood-tracker/v1": "pages/mood-tracker/v1.html",
-  "/mood-tracker/v2": "pages/mood-tracker/v2.html",
-  "/mood-tracker/v3": "pages/mood-tracker/v3.html",
-  "/mood-tracker/v4": "pages/mood-tracker/v4.html",
-  "/mood-tracker/v5": "pages/mood-tracker/v5.html",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/404": "pages/404.html"
+  "/": "pages/index.js",
+  "/mood-tracker/v5": "pages/mood-tracker/v5.js"
 }

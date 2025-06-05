@@ -273,32 +273,202 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
 };
 
 // Float효과를 위한 3D 모델 컴포넌트
-const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02, floatAmplitude = 0.5, scale = [0.8, 0.8, 0.8] }) => {
-  const mesh = useRef();
+const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02, floatAmplitude = 0.5, scale = [0.8, 0.8, 0.8], onClick, shapeId }) => {
+  const groupRef = useRef();
   const { scene } = useGLTF(url);
   
   useFrame((state) => {
-    if (mesh.current) {
+    if (groupRef.current) {
       // 둥실거리는 효과
-      mesh.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * floatSpeed) * floatAmplitude;
+      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * floatSpeed) * floatAmplitude;
       // 회전 효과
-      mesh.current.rotation.y += rotationSpeed;
-      mesh.current.rotation.x += rotationSpeed * 0.5;
+      groupRef.current.rotation.y += rotationSpeed;
+      groupRef.current.rotation.x += rotationSpeed * 0.5;
     }
   });
 
+  const handleClick = (event) => {
+    event.stopPropagation();
+    console.log(`Clicked on ${shapeId}`); // 디버깅용
+    if (onClick) {
+      onClick(shapeId);
+    }
+  };
+
+  const handlePointerOver = () => {
+    document.body.style.cursor = 'pointer';
+  };
+
+  const handlePointerOut = () => {
+    document.body.style.cursor = 'default';
+  };
+
   return (
-    <primitive 
-      ref={mesh} 
-      object={scene.clone()} 
-      position={position} 
-      scale={scale}
-    />
+    <group ref={groupRef} position={position}>
+      <primitive 
+        object={scene.clone()} 
+        scale={scale}
+      />
+      {/* 클릭 가능한 투명한 박스 */}
+      <mesh 
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <boxGeometry args={[2.5, 2.5, 2.5]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+    </group>
+  );
+};
+
+// 도형 게임창 모달 컴포넌트
+const ShapeGameModal = ({ isOpen, shapeInfo, onClose }) => {
+  if (!isOpen || !shapeInfo) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'rgba(0, 0, 0, 0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 3000,
+      animation: 'fadeIn 0.3s ease-in-out'
+    }}>
+      <div style={{
+        width: '500px',
+        height: '400px',
+        backgroundColor: 'white',
+        borderRadius: '20px',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+        padding: '40px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'relative',
+        animation: 'slideIn 0.4s ease-out'
+      }}>
+        {/* 도형 이름 */}
+        <h2 style={{
+          fontSize: '32px',
+          fontWeight: 'bold',
+          color: '#333',
+          margin: '0',
+          textAlign: 'center'
+        }}>
+          {shapeInfo.name}
+        </h2>
+
+        {/* 도형 설명 */}
+        <p style={{
+          fontSize: '20px',
+          color: '#555',
+          textAlign: 'center',
+          lineHeight: '1.6',
+          margin: '20px 0',
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          {shapeInfo.description}
+        </p>
+
+        {/* 닫기 버튼 */}
+        <button
+          onClick={onClose}
+          style={{
+            padding: '12px 40px',
+            backgroundColor: '#ff6b6b',
+            color: 'white',
+            border: 'none',
+            borderRadius: '25px',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = '#ff5252';
+            e.target.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = '#ff6b6b';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          닫기
+        </button>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideIn {
+          from { 
+            opacity: 0;
+            transform: translateY(-30px) scale(0.9);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 
 // --- 생물 만들기 페이지 컴포넌트 ---
 const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => {
+  const [isShapeGameModalOpen, setIsShapeGameModalOpen] = useState(false);
+  const [selectedShapeInfo, setSelectedShapeInfo] = useState(null);
+
+  // 도형 정보 정의
+  const shapeInfoMap = {
+    'box': {
+      name: '파란 네모',
+      description: '나는 뾰족하지만 넓은 마음을 가지고 있어!'
+    },
+    'cylinder': {
+      name: '빨간 길쭉이',
+      description: '나는 길쭉길쭉하고 동글동글하지만 강해!'
+    },
+    'hexagon': {
+      name: '노란 뾰족이',
+      description: '나는 뾰족뾰족! 날카롭지만 다양한 모습을 가지고 있어'
+    },
+    'star': {
+      name: '초록 별',
+      description: '나는 반짝반짝 빛나는 별이야!'
+    }
+  };
+
+  const handleShapeClick = (shapeId) => {
+    console.log(`handleShapeClick called with shapeId: ${shapeId}`); // 디버깅용
+    const shapeInfo = shapeInfoMap[shapeId];
+    console.log('Shape info:', shapeInfo); // 디버깅용
+    setSelectedShapeInfo(shapeInfo);
+    setIsShapeGameModalOpen(true);
+  };
+
+  const closeShapeGameModal = () => {
+    console.log('Closing shape game modal'); // 디버깅용
+    setIsShapeGameModalOpen(false);
+    // 약간의 지연을 두고 상태를 초기화
+    setTimeout(() => {
+      setSelectedShapeInfo(null);
+    }, 300);
+  };
+
   return (
     <div style={{
       width: '100vw',
@@ -392,6 +562,8 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             floatSpeed={0.015}
             floatAmplitude={0.3}
             scale={[1,1,1]}
+            onClick={handleShapeClick}
+            shapeId="box"
           />
           <FloatingModel 
             url="/clinder.gltf" 
@@ -400,6 +572,8 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             floatSpeed={0.02}
             floatAmplitude={0.4}
             scale={[1,1,1]}
+            onClick={handleShapeClick}
+            shapeId="cylinder"
           />
           <FloatingModel 
             url="/hexagon.gltf" 
@@ -408,6 +582,8 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             floatSpeed={0.018}
             floatAmplitude={0.35}
             scale={[1,1,1]}
+            onClick={handleShapeClick}
+            shapeId="hexagon"
           />
           <FloatingModel 
             url="/star.gltf" 
@@ -416,9 +592,18 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             floatSpeed={0.025}
             floatAmplitude={0.45}
             scale={[1,1,1]}
+            onClick={handleShapeClick}
+            shapeId="star"
           />
         </Suspense>
       </Canvas>
+
+      {/* 도형 게임창 모달 */}
+      <ShapeGameModal 
+        isOpen={isShapeGameModalOpen}
+        shapeInfo={selectedShapeInfo}
+        onClose={closeShapeGameModal}
+      />
     </div>
   );
 };
@@ -732,7 +917,7 @@ export default function MoodTrackerPage() {
               color="#E3F2FD"
             />
             <Environment preset="sunset" intensity={0.8} blur={0.5} />
-            <Physics>
+                        <Physics>
             <PhysicsGround />
             <ScaledScene
               bodyProps={bodyProps}

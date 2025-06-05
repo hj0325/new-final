@@ -1,1 +1,40 @@
-globalThis.__BUILD_MANIFEST={polyfillFiles:["static/chunks/polyfills-42372ed130431b0a.js"],devFiles:[],ampDevFiles:[],lowPriorityFiles:[],rootMainFiles:[],rootMainFilesTree:{},pages:{"/":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/pages/index-2856fc429c3e5abc.js"],"/_app":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/pages/_app-70feb0c3bb39056d.js"],"/_error":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/pages/_error-41608b100cc61246.js"],"/mood-tracker":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/118-33b9836537b87130.js","static/chunks/pages/mood-tracker-2bad7ecdcb6c594a.js"],"/mood-tracker copy":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/pages/mood-tracker copy-99524234fa959769.js"],"/mood-tracker/v1":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/996-c9cc280e6ff62ee3.js","static/chunks/821-e90e8afdcc7f23af.js","static/chunks/pages/mood-tracker/v1-961ababef08bfd14.js"],"/mood-tracker/v2":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/821-e90e8afdcc7f23af.js","static/chunks/pages/mood-tracker/v2-59829256196afddb.js"],"/mood-tracker/v3":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/996-c9cc280e6ff62ee3.js","static/chunks/pages/mood-tracker/v3-cf5b8bbb302d1b58.js"],"/mood-tracker/v4":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/996-c9cc280e6ff62ee3.js","static/chunks/230-81f16c940ace7075.js","static/chunks/pages/mood-tracker/v4-39c2ec365ff992cc.js"],"/mood-tracker/v5":["static/chunks/webpack-a91c5b7bfa5e5954.js","static/chunks/framework-27bd9d978813cea4.js","static/chunks/main-ef7adcb06c400f9e.js","static/chunks/4fbd81a4-467715504bf1ae1c.js","static/chunks/4559568c-97d712353b7ee5d3.js","static/chunks/69b51223-9a49c2654e831214.js","static/chunks/ccf9b928-da0797b4aa44edf0.js","static/chunks/395-6fee4ebb1a8d39ad.js","static/chunks/996-c9cc280e6ff62ee3.js","static/chunks/230-81f16c940ace7075.js","static/chunks/pages/mood-tracker/v5-038009caa01a65e3.js"]},ampFirstPages:[]},globalThis.__BUILD_MANIFEST.lowPriorityFiles=["/static/"+process.env.__NEXT_BUILD_ID+"/_buildManifest.js",,"/static/"+process.env.__NEXT_BUILD_ID+"/_ssgManifest.js"];
+globalThis.__BUILD_MANIFEST = {
+  "polyfillFiles": [
+    "static/chunks/polyfills.js"
+  ],
+  "devFiles": [
+    "static/chunks/react-refresh.js"
+  ],
+  "ampDevFiles": [],
+  "lowPriorityFiles": [],
+  "rootMainFiles": [],
+  "rootMainFilesTree": {},
+  "pages": {
+    "/": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/index.js"
+    ],
+    "/_app": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/_app.js"
+    ],
+    "/_error": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/_error.js"
+    ],
+    "/mood-tracker/v5": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/mood-tracker/v5.js"
+    ]
+  },
+  "ampFirstPages": []
+};
+globalThis.__BUILD_MANIFEST.lowPriorityFiles = [
+"/static/" + process.env.__NEXT_BUILD_ID + "/_buildManifest.js",
+,"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js",
+
+];

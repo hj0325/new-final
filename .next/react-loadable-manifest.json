@@ -1,14 +1,16 @@
 {
   "node_modules/@react-three/drei/core/VideoTexture.js -> hls.js": {
-    "id": null,
+    "id": "node_modules/@react-three/drei/core/VideoTexture.js -> hls.js",
     "files": []
   },
   "node_modules/@react-three/drei/web/FaceLandmarker.js -> @mediapipe/tasks-vision": {
-    "id": null,
-    "files": []
+    "id": "node_modules/@react-three/drei/web/FaceLandmarker.js -> @mediapipe/tasks-vision",
+    "files": [
+      "static/chunks/_pages-dir-browser_node_modules_mediapipe_tasks-vision_vision_bundle_mjs.js"
+    ]
   },
   "node_modules/@react-three/rapier/dist/react-three-rapier.esm.js -> @dimforge/rapier3d-compat": {
-    "id": 9659,
+    "id": "node_modules/@react-three/rapier/dist/react-three-rapier.esm.js -> @dimforge/rapier3d-compat",
     "files": []
   }
 }
