@@ -3,6 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/mood-tracker/v5": "pages/mood-tracker/v5.js",
-  "/mood-tracker/v4": "pages/mood-tracker/v4.js",
-  "/": "pages/index.js"
+  "/mood-tracker/v4": "pages/mood-tracker/v4.js"
 }
