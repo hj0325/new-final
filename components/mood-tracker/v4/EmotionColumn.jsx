@@ -11,7 +11,7 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
       width: 260,
       minWidth: 220,
       minHeight: '100vh',
-      background: '#B02B3A',
+      background: '#F5E6A8',
       borderRadius: 30,
       padding: '24px 12px',
       display: 'flex',
@@ -169,7 +169,7 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
         flexDirection: 'column',
         gap: 4
       }}>
-        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 배워보기</div>
+        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 끝말잇기</div>
         <div style={{ minHeight: 24 }}>
           {keywords && keywords.length > 0 ? keywords.map((k, i) => (
             <span key={i} style={{ marginRight: 8 }}>{k}</span>

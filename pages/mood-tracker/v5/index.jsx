@@ -864,12 +864,72 @@ export default function MoodTrackerPage() {
     );
   }
 
+  // 현재 날짜와 시간 가져오기
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayName = dayNames[now.getDay()];
+    const hour = now.getHours();
+    const minute = now.getMinutes().toString().padStart(2, '0');
+    
+    return `${year}년 ${month}월 ${day}일 (${dayName}) 오후 ${hour}:${minute}`;
+  };
+
   return (
     <FullScreenContainer>
+      {/* 상단 헤더 정보 */}
+      <div style={{
+        position: 'absolute',
+        top: '-40px',
+        left: '0px',
+        width: '100%',
+        background: '#F5E6A8',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 100,
+        padding: '20px 40px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}>
+        {/* 왼쪽: 제목 */}
+        <div style={{
+          color: '#333',
+          fontSize: '18px',
+          fontWeight: '600'
+        }}>
+          이모티콘을 이용해 오늘의 감정 무게를 측정하고 기록하세요
+        </div>
+        
+        {/* 오른쪽: 오늘의 감정 기록하기와 날짜 */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '5px'
+        }}>
+          <div style={{
+            color: '#333',
+            fontSize: '18px',
+            fontWeight: '600'
+          }}>
+            오늘의 감정 기록하기
+          </div>
+          <div style={{
+            color: '#666',
+            fontSize: '14px'
+          }}>
+            {getCurrentDateTime()}
+          </div>
+        </div>
+      </div>
+
       {userInputText && (
         <div style={{
           position: 'absolute',
-          top: '30px',
+          top: '90px', // 상단 헤더 아래로 이동
           left: '50%',
           transform: 'translateX(-50%)',
           padding: '12px 25px',
@@ -894,7 +954,7 @@ export default function MoodTrackerPage() {
           onClick={handleStartGame}
           style={{
             position: 'absolute',
-            top: '55px',
+            top: '140px', // 상단 헤더와 텍스트 아래로 이동
             left: '50%',
             transform: 'translateX(-50%)',
             padding: '15px 30px',

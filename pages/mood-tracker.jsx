@@ -23,10 +23,26 @@ const FullScreenContainer = ({ children }) => (
     justifyContent: 'center',
     gap: '10px',
     alignItems: 'center',
-    background: '#ffffff',
+    background: '#000000',
     overflow: 'hidden',
     position: 'relative'
   }}>
+    {/* 배경 MOMO 텍스트 */}
+    <div style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      fontSize: 'min(25vw, 25vh)',
+      fontWeight: 'bold',
+      color: 'rgba(255, 255, 255, 0.1)',
+      fontFamily: 'Arial, sans-serif',
+      pointerEvents: 'none',
+      zIndex: 0,
+      userSelect: 'none'
+    }}>
+      MOMO
+    </div>
     {children}
   </div>
 );
@@ -608,7 +624,7 @@ function EmotionColumn({ emoji = '😀', keywords = [], sliderValue = 50, onSlid
         flexDirection: 'column',
         gap: 4
       }}>
-        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 배워보기</div>
+        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 끝말잇기</div>
         <div>
           {keywords.map((k, i) => (
             <span key={i} style={{ marginRight: 8 }}>{k}</span>
@@ -881,22 +897,82 @@ export default function MoodTrackerPage() {
     );
   }
 
+  // 현재 날짜와 시간 가져오기
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayName = dayNames[now.getDay()];
+    const hour = now.getHours();
+    const minute = now.getMinutes().toString().padStart(2, '0');
+    
+    return `${year}년 ${month}월 ${day}일 (${dayName}) 오후 ${hour}:${minute}`;
+  };
+
   return (
     <FullScreenContainer>
+      {/* 상단 헤더 정보 */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '90%',
+        maxWidth: '1200px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 100,
+        padding: '0 20px'
+      }}>
+        {/* 왼쪽: 제목 */}
+        <div style={{
+          color: 'white',
+          fontSize: '18px',
+          fontWeight: '600'
+        }}>
+          이모티콘을 이용해 오늘의 감정 무게를 측정하고 기록하세요
+        </div>
+        
+        {/* 오른쪽: 오늘의 감정 기록하기와 날짜 */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '5px'
+        }}>
+          <div style={{
+            color: 'white',
+            fontSize: '18px',
+            fontWeight: '600'
+          }}>
+            오늘의 감정 기록하기
+          </div>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontSize: '14px'
+          }}>
+            {getCurrentDateTime()}
+          </div>
+        </div>
+      </div>
+
       {userInputText && (
         <div style={{
           position: 'absolute',
-          top: '30px', // 상단 여백 증가
+          top: '80px', // 상단 헤더 아래로 이동
           left: '50%',
           transform: 'translateX(-50%)',
-          padding: '12px 25px', // 패딩 증가
-          background: 'rgba(255, 255, 255, 0.85)', // 배경 약간 더 불투명하게
-          borderRadius: '12px', // 더 둥글게
-          boxShadow: '0 4px 8px rgba(0,0,0,0.15)', // 그림자 약간 강화
-          fontSize: '20px', // 폰트 크기 증가
-          fontWeight: '500', // 폰트 두께
-          color: '#333', // 텍스트 색상
-          zIndex: 100, // 다른 UI 요소 위에 오도록
+          padding: '12px 25px',
+          background: 'rgba(255, 255, 255, 0.85)',
+          borderRadius: '12px',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+          fontSize: '20px',
+          fontWeight: '500',
+          color: '#333',
+          zIndex: 100,
           textAlign: 'center',
           minWidth: '200px',
           maxWidth: '80%',
