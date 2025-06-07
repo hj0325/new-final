@@ -1,7 +1,7 @@
-import React, { useState, Suspense, useRef } from 'react';
+import React, { useState, Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, OrthographicCamera, useGLTF } from '@react-three/drei';
-import { Physics } from '@react-three/rapier';
+import { Physics, RigidBody } from '@react-three/rapier';
 import { useControls } from 'leva';
 import FullScreenContainer from '../../../components/mood-tracker/v4/FullScreenContainer';
 import GameModal from '../../../components/mood-tracker/v4/GameModal';
@@ -322,8 +322,56 @@ const FloatingModel = ({ url, position, rotationSpeed = 0.01, floatSpeed = 0.02,
   );
 };
 
+// --- 떨어지는 도형 컴포넌트 ---
+const FallingShape = ({ shapeInfo, position, scale = [0.8, 0.8, 0.8] }) => {
+  const { scene } = useGLTF(getShapeModelPath(shapeInfo));
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+
+  return (
+    <RigidBody
+      type="dynamic"
+      position={position}
+colliders="cuboid"
+      restitution={0.3}
+      friction={0.8}
+    >
+      <primitive 
+        object={clonedScene} 
+        scale={scale}
+      />
+    </RigidBody>
+  );
+};
+
+// 도형별 모델 경로 반환 함수
+const getShapeModelPath = (shapeInfo) => {
+  const pathMap = {
+    '파란 네모': '/box.gltf',
+    '빨간 길쭉이': '/clinder.gltf',
+    '노란 뾰족이': '/hexagon.gltf',
+    '초록 별': '/star.gltf'
+  };
+  return pathMap[shapeInfo.name] || '/box.gltf';
+};
+
+// --- 가상 바닥 컴포넌트 ---
+const InvisibleGround = () => {
+  return (
+    <RigidBody type="fixed" position={[0, -3, 0]}>
+      <mesh>
+        <boxGeometry args={[20, 0.1, 20]} />
+        <meshStandardMaterial 
+          color="#F5E6A8" 
+          transparent 
+          opacity={0} // 완전히 투명하게
+        />
+      </mesh>
+    </RigidBody>
+  );
+};
+
 // 도형 게임창 모달 컴포넌트
-const ShapeGameModal = ({ isOpen, shapeInfo, onClose }) => {
+const ShapeGameModal = ({ isOpen, shapeInfo, onClose, onSelect }) => {
   if (!isOpen || !shapeInfo) return null;
 
   return (
@@ -379,32 +427,69 @@ const ShapeGameModal = ({ isOpen, shapeInfo, onClose }) => {
           {shapeInfo.description}
         </p>
 
-        {/* 닫기 버튼 */}
-        <button
-          onClick={onClose}
-          style={{
-            padding: '12px 40px',
-            backgroundColor: '#ff6b6b',
-            color: 'white',
-            border: 'none',
-            borderRadius: '25px',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)'
-          }}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = '#ff5252';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = '#ff6b6b';
-            e.target.style.transform = 'translateY(0)';
-          }}
-        >
-          닫기
-        </button>
+        {/* 버튼들 */}
+        <div style={{
+          display: 'flex',
+          gap: '20px',
+          alignItems: 'center'
+        }}>
+          {/* 선택 버튼 */}
+          <button
+            onClick={() => {
+              if (onSelect) onSelect(shapeInfo);
+              onClose();
+            }}
+            style={{
+              padding: '12px 40px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '25px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = '#45a049';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = '#4CAF50';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            선택
+          </button>
+
+          {/* 닫기 버튼 */}
+          <button
+            onClick={onClose}
+            style={{
+              padding: '12px 40px',
+              backgroundColor: '#ff6b6b',
+              color: 'white',
+              border: 'none',
+              borderRadius: '25px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 12px rgba(255, 107, 107, 0.3)'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = '#ff5252';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = '#ff6b6b';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            닫기
+          </button>
+        </div>
       </div>
 
       <style jsx>{`
@@ -431,6 +516,7 @@ const ShapeGameModal = ({ isOpen, shapeInfo, onClose }) => {
 const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => {
   const [isShapeGameModalOpen, setIsShapeGameModalOpen] = useState(false);
   const [selectedShapeInfo, setSelectedShapeInfo] = useState(null);
+  const [selectedShapes, setSelectedShapes] = useState([]); // 선택된 도형들 저장
 
   // 도형 정보 정의
   const shapeInfoMap = {
@@ -469,11 +555,25 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
     }, 300);
   };
 
+  const handleShapeSelect = (shapeInfo) => {
+    console.log('Shape selected:', shapeInfo);
+    // 선택된 도형을 배열에 추가
+    setSelectedShapes(prev => [...prev, {
+      ...shapeInfo,
+      id: Date.now(), // 고유 ID 생성
+      position: [
+        Math.random() * 4 - 2, // X: -2 ~ 2 범위
+        8, // Y: 높은 위치에서 시작
+        Math.random() * 4 - 2  // Z: -2 ~ 2 범위
+      ]
+    }]);
+  };
+
   return (
     <div style={{
       width: '100vw',
       height: '100vh',
-      background: 'url(/second.jpg) center/cover no-repeat',
+      background: '#F5E6A8', // 베이지색으로 변경
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -548,53 +648,82 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
       </div>
       
       {/* 3D 씬 */}
-      <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
+      <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}>
         <Suspense fallback={null}>
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[10, 10, 5]} intensity={1} />
-          <directionalLight position={[-10, -10, -5]} intensity={0.3} />
+          <ambientLight intensity={0.25} color="#FFFFFF" />
+          <directionalLight 
+            position={[8, 10, 5]} 
+            intensity={0.2} 
+            castShadow
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
+          />
+          <directionalLight 
+            position={[-8, 5, -8]} 
+            intensity={0.1}
+            color="#E3F2FD"
+          />
+          <Environment preset="sunset" intensity={0.8} blur={0.5} />
           
-          {/* 4개의 3D 모델들을 중앙 주변에 배치 */}
-          <FloatingModel 
-            url="/box.gltf" 
-            position={[-4, 0, 0]} 
-            rotationSpeed={0.008}
-            floatSpeed={0.015}
-            floatAmplitude={0.3}
-            scale={[1,1,1]}
-            onClick={handleShapeClick}
-            shapeId="box"
-          />
-          <FloatingModel 
-            url="/clinder.gltf" 
-            position={[-1.3, 0, 0]} 
-            rotationSpeed={0.012}
-            floatSpeed={0.02}
-            floatAmplitude={0.4}
-            scale={[1,1,1]}
-            onClick={handleShapeClick}
-            shapeId="cylinder"
-          />
-          <FloatingModel 
-            url="/hexagon.gltf" 
-            position={[1.3, 0, 0]} 
-            rotationSpeed={0.01}
-            floatSpeed={0.018}
-            floatAmplitude={0.35}
-            scale={[1,1,1]}
-            onClick={handleShapeClick}
-            shapeId="hexagon"
-          />
-          <FloatingModel 
-            url="/star.gltf" 
-            position={[4, 0, 0]} 
-            rotationSpeed={0.015}
-            floatSpeed={0.025}
-            floatAmplitude={0.45}
-            scale={[1,1,1]}
-            onClick={handleShapeClick}
-            shapeId="star"
-          />
+          <Physics>
+            {/* 가상 바닥 */}
+            <InvisibleGround />
+            
+            {/* 선택된 도형들 - 떨어지는 효과 */}
+            {selectedShapes.map((shape) => (
+              <FallingShape
+                key={shape.id}
+                shapeInfo={shape}
+                position={shape.position}
+                scale={[0.8, 0.8, 0.8]}
+              />
+            ))}
+            
+            {/* 하단의 3D 이모티콘들 - 메인 페이지와 동일한 위치와 크기 */}
+            <EmojiSelector3D onEmojiClick={() => {}} />
+            
+            {/* 4개의 3D 모델들을 중앙 주변에 배치 */}
+            <FloatingModel 
+              url="/box.gltf" 
+              position={[-4, 0, 0]} 
+              rotationSpeed={0.008}
+              floatSpeed={0.015}
+              floatAmplitude={0.3}
+              scale={[1,1,1]}
+              onClick={handleShapeClick}
+              shapeId="box"
+            />
+            <FloatingModel 
+              url="/clinder.gltf" 
+              position={[-1.3, 0, 0]} 
+              rotationSpeed={0.012}
+              floatSpeed={0.02}
+              floatAmplitude={0.4}
+              scale={[1,1,1]}
+              onClick={handleShapeClick}
+              shapeId="cylinder"
+            />
+            <FloatingModel 
+              url="/hexagon.gltf" 
+              position={[1.3, 0, 0]} 
+              rotationSpeed={0.01}
+              floatSpeed={0.018}
+              floatAmplitude={0.35}
+              scale={[1,1,1]}
+              onClick={handleShapeClick}
+              shapeId="hexagon"
+            />
+            <FloatingModel 
+              url="/star.gltf" 
+              position={[4, 0, 0]} 
+              rotationSpeed={0.015}
+              floatSpeed={0.025}
+              floatAmplitude={0.45}
+              scale={[1,1,1]}
+              onClick={handleShapeClick}
+              shapeId="star"
+            />
+          </Physics>
         </Suspense>
       </Canvas>
 
@@ -603,6 +732,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
         isOpen={isShapeGameModalOpen}
         shapeInfo={selectedShapeInfo}
         onClose={closeShapeGameModal}
+        onSelect={handleShapeSelect}
       />
     </div>
   );
