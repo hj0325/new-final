@@ -34,6 +34,8 @@ const FullScreenContainer = ({ children }) => (
 // --- UI 컴포넌트: 하단 이모티콘 선택 바 ---
 const IconBarPlaceholder = ({ onEmojiSelect }) => {
   const emojis = ['😀', '😮', '😐', '😖', '😠']; 
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  
   return (
     <div style={{
       position: 'absolute',
@@ -46,13 +48,22 @@ const IconBarPlaceholder = ({ onEmojiSelect }) => {
       zIndex: 20,
     }}>
       {emojis.map((emoji, index) => (
-        <div key={index} style={{
+        <div 
+          key={index} 
+          style={{
           fontSize: '130px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           cursor: 'pointer',
-        }} onClick={() => onEmojiSelect(emoji)}>
+            transition: 'all 0.3s ease',
+            filter: hoveredIndex === index ? 'drop-shadow(0 0 20px #ffff00) brightness(1.5)' : 'none',
+            transform: hoveredIndex === index ? 'scale(1.1)' : 'scale(1)',
+          }} 
+          onClick={() => onEmojiSelect(emoji)}
+          onMouseEnter={() => setHoveredIndex(index)}
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
           {emoji}
         </div>
       ))}
@@ -257,8 +268,8 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmoji, onClose }) => {
   );
 };
 
-// --- UI 컴포넌트: 게임 모달 (이모티콘 클릭 시 표시) ---
-const GameModal = ({ isOpen, emoji, onClose }) => {
+// --- UI 컴포넌트: 게임 모달 ---
+const GameModal = ({ isOpen, emoji, onClose, onPositiveNegativeSelect }) => {
   const [currentKeywordInput, setCurrentKeywordInput] = React.useState('');
   const [userKeywords, setUserKeywords] = React.useState([]);
 
@@ -268,7 +279,7 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
       setCurrentKeywordInput('');
       setUserKeywords([]);
     } else {
-      // 모달이 닫힐 때도念のため 초기화 (선택적)
+      // 모달이 닫힐 때도념のため 초기화 (선택적)
       setCurrentKeywordInput('');
       setUserKeywords([]);
     }
@@ -283,6 +294,16 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
       setUserKeywords(prev => [...prev, currentKeywordInput.trim()]);
       setCurrentKeywordInput('');
     }
+  };
+
+  const handlePositiveClick = () => {
+    onPositiveNegativeSelect('positive');
+    onClose();
+  };
+
+  const handleNegativeClick = () => {
+    onPositiveNegativeSelect('negative');
+    onClose();
   };
 
   return (
@@ -311,14 +332,14 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
       zIndex: 1000,
     }}>
       <span style={{ fontSize: '100px', marginBottom: '0px' }}>{emoji}</span> {/* 이모지 크기 약간 줄임 */}
-      <h2 style={{ textAlign: 'center', marginTop: '0px', marginBottom: '10px', fontSize: '22px' }}>나의 감정 키워드</h2>
+      <h2 style={{ textAlign: 'center', marginTop: '0px', marginBottom: '10px', fontSize: '22px' }}>오늘의 감정 이유</h2>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '90%', marginBottom:'10px' }}>
         <input 
           type="text"
           value={currentKeywordInput}
           onChange={(e) => setCurrentKeywordInput(e.target.value)}
-          placeholder="키워드 입력"
+          placeholder="선택 이유"
           style={{
             flexGrow: 1,
             padding: '10px 15px',
@@ -368,18 +389,31 @@ const GameModal = ({ isOpen, emoji, onClose }) => {
           <span style={{color: '#888', fontSize: '16px'}}>입력한 키워드가 여기에 표시됩니다.</span>
         )}
       </div>
-      <button onClick={onClose} style={{
-        marginTop: 'auto', // 버튼을 아래로 밀기
-        padding: '10px 20px',
-        fontSize: '16px',
+      
+      <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+        <button onClick={handlePositiveClick} style={{
+          padding: '12px 25px',
+          fontSize: '18px',
         cursor: 'pointer',
         background: '#007bff',
         color: 'white',
         border: 'none',
         borderRadius: '5px'
       }}>
-        닫기
+          긍정
+        </button>
+        <button onClick={handleNegativeClick} style={{
+          padding: '12px 25px',
+          fontSize: '18px',
+          cursor: 'pointer',
+          background: '#28a745',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px'
+        }}>
+          부정
       </button>
+      </div>
     </div>
   );
 };
@@ -615,6 +649,7 @@ export default function MoodTrackerPage() {
   const [leftSliderValue, setLeftSliderValue] = useState(30); // 왼쪽 슬라이더 값
   const [rightSliderValue, setRightSliderValue] = useState(70); // 오른쪽 슬라이더 값
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
+  const [showColumns, setShowColumns] = useState(false); // 양쪽 칼럼 표시 상태
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
@@ -869,10 +904,12 @@ export default function MoodTrackerPage() {
           {userInputText}
         </div>
       )}
+      {showColumns && (
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
         <EmotionColumn emoji="😀" keywords={keywords} sliderValue={leftSliderValue} onSliderChange={setLeftSliderValue} onStartGame={handleStartGame} />
         <EmotionColumn emoji="😞" keywords={keywords} sliderValue={rightSliderValue} onSliderChange={setRightSliderValue} onStartGame={handleStartGame} />
       </div>
+      )}
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
           <Suspense fallback={null}>
@@ -903,7 +940,11 @@ export default function MoodTrackerPage() {
         </Canvas>
       </div>
       <IconBarPlaceholder onEmojiSelect={handleEmojiSelectForGame} />
-      <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGame} onClose={closeGameModal} />
+              <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGame} onClose={closeGameModal} onPositiveNegativeSelect={(type) => {
+          // 긍정/부정 버튼 클릭 시 양쪽 칼럼 표시
+          setShowColumns(true);
+          console.log(`Selected ${type} emotion: ${selectedEmojiForGame}`);
+        }} />
       <GameCreationModal
         isOpen={isGameCreationModalOpen}
         keyword={userInputText}

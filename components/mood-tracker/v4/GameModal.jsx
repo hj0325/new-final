@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { emojiKeywords } from './constants';
 // import { emojiKeywords } from './constants'; //This will be used once constants.js is created
 
 const GameModal = ({ isOpen, emoji, onClose, onEmojiSelect, onKeywordUpdate, existingKeywords = [] }) => {
   const [currentKeywordInput, setCurrentKeywordInput] = React.useState('');
   const [userKeywords, setUserKeywords] = React.useState([]);
+  const [hoveredButton, setHoveredButton] = useState(null);
 
   React.useEffect(() => {
     if (isOpen && emoji) {
@@ -107,27 +108,56 @@ const GameModal = ({ isOpen, emoji, onClose, onEmojiSelect, onKeywordUpdate, exi
           <span style={{color: '#888', fontSize: '16px'}}>입력한 키워드가 여기에 표시됩니다.</span>
         )}
       </div>
-      <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
-        <button onClick={() => onEmojiSelect && onEmojiSelect(emoji, userKeywords, 'positive')} style={{
-          padding: '10px 20px',
+      <div style={{ display: 'flex', gap: '20px', marginTop: 'auto', justifyContent: 'center' }}>
+        {/* 긍정 버튼 - 동그라미, 노란색 */}
+        <button 
+          onClick={() => userKeywords.length > 0 && onEmojiSelect && onEmojiSelect(emoji, userKeywords, 'positive')} 
+          onMouseEnter={() => setHoveredButton('positive')}
+          onMouseLeave={() => setHoveredButton(null)}
+          disabled={userKeywords.length === 0}
+          style={{
+            width: '80px',
+            height: '80px',
           fontSize: '16px',
-          cursor: 'pointer',
-          background: '#007bff',
-          color: 'white',
+            fontWeight: 'bold',
+            cursor: userKeywords.length > 0 ? 'pointer' : 'not-allowed',
+            background: userKeywords.length > 0 ? '#FFD700' : '#cccccc',
+            color: userKeywords.length > 0 ? '#333' : '#666',
           border: 'none',
-          borderRadius: '5px'
-        }}>
+            borderRadius: '50%', // 동그라미
+            transition: 'all 0.3s ease',
+            boxShadow: hoveredButton === 'positive' && userKeywords.length > 0 
+              ? '0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 40px #FFD700' 
+              : '0 4px 8px rgba(0,0,0,0.2)',
+            transform: hoveredButton === 'positive' && userKeywords.length > 0 ? 'scale(1.05)' : 'scale(1)'
+          }}
+        >
           긍정
         </button>
-        <button onClick={() => onEmojiSelect && onEmojiSelect(emoji, userKeywords, 'negative')} style={{
-          padding: '10px 20px',
+        
+        {/* 부정 버튼 - 네모, 빨간색 */}
+        <button 
+          onClick={() => userKeywords.length > 0 && onEmojiSelect && onEmojiSelect(emoji, userKeywords, 'negative')} 
+          onMouseEnter={() => setHoveredButton('negative')}
+          onMouseLeave={() => setHoveredButton(null)}
+          disabled={userKeywords.length === 0}
+          style={{
+            width: '80px',
+            height: '80px',
           fontSize: '16px',
-          cursor: 'pointer',
-          background: '#5cb85c',
-          color: 'white',
+            fontWeight: 'bold',
+            cursor: userKeywords.length > 0 ? 'pointer' : 'not-allowed',
+            background: userKeywords.length > 0 ? '#FF4444' : '#cccccc',
+            color: userKeywords.length > 0 ? 'white' : '#666',
           border: 'none',
-          borderRadius: '5px'
-        }}>
+            borderRadius: '8px', // 네모 (약간 둥글게)
+            transition: 'all 0.3s ease',
+            boxShadow: hoveredButton === 'negative' && userKeywords.length > 0 
+              ? '0 0 20px #FF4444, 0 0 30px #FF4444, 0 0 40px #FF4444' 
+              : '0 4px 8px rgba(0,0,0,0.2)',
+            transform: hoveredButton === 'negative' && userKeywords.length > 0 ? 'scale(1.05)' : 'scale(1)'
+          }}
+        >
           부정
         </button>
       </div>

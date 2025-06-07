@@ -623,6 +623,7 @@ export default function MoodTrackerPage() {
   const [rightSliderValue, setRightSliderValue] = useState(7);
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
   const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
+  const [showColumns, setShowColumns] = useState(false); // 양쪽 칼럼 표시 상태
   
   // Leva를 사용한 바구니 이모티콘 조정 컨트롤
   const { 
@@ -752,6 +753,8 @@ export default function MoodTrackerPage() {
       setNegativeEmojis(prev => [...prev, emoji]);
       setNegativeKeywords(prev => [...prev, ...keywords]);
     }
+    // 긍정/부정 버튼 클릭 시 양쪽 칼럼 표시
+    setShowColumns(true);
     closeGameModal();
   };
 
@@ -884,22 +887,56 @@ export default function MoodTrackerPage() {
           {userInputText}
         </div>
       )}
-      <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-        <EmotionColumn 
-          emojis={positiveEmojis} 
-          keywords={positiveKeywords} 
-          sliderValue={leftSliderValue}
-          onSliderChange={setLeftSliderValue}
-          onStartGame={handleStartGame}
-        />
-        <EmotionColumn 
-          emojis={negativeEmojis} 
-          keywords={negativeKeywords} 
-          sliderValue={rightSliderValue}
-          onSliderChange={setRightSliderValue}
-          onStartGame={handleStartGame}
-        />
-      </div>
+      
+      {/* 만들기 시작 버튼 - 이모티콘이 있고 슬라이더가 조작되었을 때만 표시 */}
+      {showColumns && (positiveEmojis.length > 0 || negativeEmojis.length > 0) && (
+        <button
+          onClick={handleStartGame}
+          style={{
+            position: 'absolute',
+            top: '55px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: '15px 30px',
+            fontSize: '22px',
+            fontWeight: 'bold',
+            background: 'white',
+            color: 'black',
+            border: 'none',
+            borderRadius: '18px',
+            boxShadow: '0 4px 12px rgba(176, 43, 58, 0.3)',
+            cursor: 'pointer',
+            zIndex: 100,
+            transition: 'all 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateX(-50%) scale(1.05)';
+            e.target.style.boxShadow = '0 6px 16px rgba(176, 43, 58, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateX(-50%) scale(1)';
+            e.target.style.boxShadow = '0 4px 12px rgba(176, 43, 58, 0.3)';
+          }}
+        >
+          만들기 시작
+        </button>
+      )}
+      {showColumns && (
+        <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+          <EmotionColumn 
+            emojis={positiveEmojis} 
+            keywords={positiveKeywords} 
+            sliderValue={leftSliderValue}
+            onSliderChange={setLeftSliderValue}
+          />
+          <EmotionColumn 
+            emojis={negativeEmojis} 
+            keywords={negativeKeywords} 
+            sliderValue={rightSliderValue}
+            onSliderChange={setRightSliderValue}
+          />
+        </div>
+      )}
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
           <Suspense fallback={null}>

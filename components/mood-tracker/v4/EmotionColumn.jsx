@@ -1,6 +1,6 @@
 import React from 'react';
 
-function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderChange, onStartGame }) {
+function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderChange }) {
   // 이모티콘 개수에 따른 박스 높이 계산
   const baseHeight = 90; // 기본 높이
   const emojiHeight = 65; // 이모티콘당 높이
@@ -177,23 +177,6 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
         </div>
       </div>
       <div style={{ flex: 1 }} />
-      <button
-        style={{
-          width: '90%',
-          background: 'white',
-          color: '#B02B3A',
-          border: 'none',
-          borderRadius: 18,
-          fontWeight: 700,
-          fontSize: 20,
-          padding: '12px 0',
-          marginTop: 'auto',
-          marginBottom: 40,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-          cursor: 'pointer'
-        }}
-        onClick={onStartGame}
-      >만들기 시작</button>
     </div>
   );
 }
