@@ -887,11 +887,12 @@ export default function MoodTrackerPage() {
         left: '0px',
         width: '100%',
         background: '#F5E6A8',
+        border: '3px solid #B02B3A',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 100,
-        padding: '20px 40px',
+        padding: '50px 40px 15px 40px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
         {/* 왼쪽: 제목 */}
@@ -929,7 +930,7 @@ export default function MoodTrackerPage() {
       {userInputText && (
         <div style={{
           position: 'absolute',
-          top: '90px', // 상단 헤더 아래로 이동
+          top: '60px', // 상단 헤더 아래로 이동
           left: '50%',
           transform: 'translateX(-50%)',
           padding: '12px 25px',
@@ -954,7 +955,7 @@ export default function MoodTrackerPage() {
           onClick={handleStartGame}
           style={{
             position: 'absolute',
-            top: '140px', // 상단 헤더와 텍스트 아래로 이동
+            top: '110px', // 상단 헤더와 텍스트 아래로 이동
             left: '50%',
             transform: 'translateX(-50%)',
             padding: '15px 30px',

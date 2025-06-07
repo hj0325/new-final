@@ -20,162 +20,185 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
       gap: 24,
       boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
     }}>
+      {/* 첫 번째 빨간 네모 박스 - 감정 무게 섹션 */}
       <div style={{
         width: '100%',
-        background: '#D2F2E9',
-        color: '#222',
-        fontWeight: 700,
-        fontSize: 22,
-        borderRadius: 12,
-        textAlign: 'center',
-        padding: '10px 0',
-        marginTop: 22, 
-        marginBottom: 1
-      }}>감정 무게</div>
-      <div style={{
-        width: '90%',
-        background: 'white',
-        borderRadius: 18,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+        background: '#B02B3A',
+        borderRadius: 15,
+        padding: '15px',
+        marginTop: 22,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        padding: '18px 0',
-        marginBottom: 30,
-        minHeight: dynamicHeight
+        gap: '12px'
       }}>
-        <div style={{ 
-          fontSize: 60, // 기존 크기 유지
-          marginBottom: 10, 
-          minHeight: emojis.length > 0 ? (emojis.length * 65) : 72,
+        {/* 감정 무게 제목 */}
+        <div style={{
+          width: '100%',
+          background: 'white',
+          color: '#222',
+          fontWeight: 700,
+          fontSize: 22,
+          borderRadius: 12,
+          textAlign: 'center',
+          padding: '10px 0'
+        }}>감정 무게</div>
+        
+        {/* 이모티콘 + 슬라이더 영역 */}
+        <div style={{
+          width: '100%',
+          background: 'white',
+          borderRadius: 18,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
           display: 'flex',
-          flexDirection: 'column', // 세로 배치
-          justifyContent: 'center',
+          flexDirection: 'column',
           alignItems: 'center',
-          gap: '0px'
+          padding: '18px 0',
+          minHeight: dynamicHeight
         }}>
-          {emojis.length > 0 ? emojis.map((emoji, index) => (
-            <span key={index} style={{ 
-              fontSize: 60, // 모든 이모티콘 기존 크기 유지
-              lineHeight: '65px'
-            }}>
-              {emoji}
-            </span>
-          )) : ''}
-        </div>
-        <div 
-          style={{ 
-            width: '80%', 
-            height: 18, 
-            background: '#BFE2D6', 
-            borderRadius: 9, 
-            position: 'relative', 
-            margin: '10px 0',
-            cursor: 'pointer'
-          }}
-          onMouseDown={(e) => {
-            if (!onSliderChange) return;
-            e.preventDefault();
-            
-            const rect = e.currentTarget.getBoundingClientRect();
-            const startX = rect.left;
-            const width = rect.width;
-            
-            const handleMove = (clientX) => {
-              const x = clientX - startX;
-              const percentage = Math.max(0, Math.min(100, (x / width) * 100));
-              const newValue = Math.round((percentage / 100) * 10); // 0-10 범위로 변환
-              onSliderChange(newValue);
-            };
-            
-            const handleMouseMove = (moveEvent) => handleMove(moveEvent.clientX);
-            const handleTouchMove = (touchEvent) => {
-              touchEvent.preventDefault();
-              handleMove(touchEvent.touches[0].clientX);
-            };
-            
-            const handleEnd = () => {
-              document.removeEventListener('mousemove', handleMouseMove);
-              document.removeEventListener('mouseup', handleEnd);
-              document.removeEventListener('touchmove', handleTouchMove);
-              document.removeEventListener('touchend', handleEnd);
-            };
-            
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleEnd);
-            document.addEventListener('touchmove', handleTouchMove, { passive: false });
-            document.addEventListener('touchend', handleEnd);
-            
-            // 초기 클릭/터치 위치에서도 값 설정
-            handleMove(e.clientX);
-          }}
-          onTouchStart={(e) => {
-            if (!onSliderChange) return;
-            e.preventDefault();
-            
-            const rect = e.currentTarget.getBoundingClientRect();
-            const startX = rect.left;
-            const width = rect.width;
-            
-            const handleMove = (clientX) => {
-              const x = clientX - startX;
-              const percentage = Math.max(0, Math.min(100, (x / width) * 100));
-              const newValue = Math.round((percentage / 100) * 10);
-              onSliderChange(newValue);
-            };
-            
-            // 초기 터치 위치에서 값 설정
-            handleMove(e.touches[0].clientX);
-          }}
-        >
-          <div style={{
-            position: 'absolute',
-            left: `calc(${(sliderValue / 10) * 100}% - 16px)`, // 0-10 값을 0-100%로 변환
-            top: -7,
-            width: 32,
-            height: 32,
-            background: '#E94B5A',
-            borderRadius: '50%',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.13)',
-            border: '3px solid #fff',
-            transition: 'left 0.2s',
-            cursor: 'grab'
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: 25,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#666'
+          <div style={{ 
+            fontSize: 60,
+            marginBottom: 10, 
+            minHeight: emojis.length > 0 ? (emojis.length * 65) : 72,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '0px'
           }}>
-            {sliderValue}
+            {emojis.length > 0 ? emojis.map((emoji, index) => (
+              <span key={index} style={{ 
+                fontSize: 60,
+                lineHeight: '65px'
+              }}>
+                {emoji}
+              </span>
+            )) : ''}
+          </div>
+          <div 
+            style={{ 
+              width: '80%', 
+              height: 18, 
+              background: '#BFE2D6', 
+              borderRadius: 9, 
+              position: 'relative', 
+              margin: '10px 0',
+              cursor: 'pointer'
+            }}
+            onMouseDown={(e) => {
+              if (!onSliderChange) return;
+              e.preventDefault();
+              
+              const rect = e.currentTarget.getBoundingClientRect();
+              const startX = rect.left;
+              const width = rect.width;
+              
+              const handleMove = (clientX) => {
+                const x = clientX - startX;
+                const percentage = Math.max(0, Math.min(100, (x / width) * 100));
+                const newValue = Math.round((percentage / 100) * 10);
+                onSliderChange(newValue);
+              };
+              
+              const handleMouseMove = (moveEvent) => handleMove(moveEvent.clientX);
+              const handleTouchMove = (touchEvent) => {
+                touchEvent.preventDefault();
+                handleMove(touchEvent.touches[0].clientX);
+              };
+              
+              const handleEnd = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleEnd);
+                document.removeEventListener('touchmove', handleTouchMove);
+                document.removeEventListener('touchend', handleEnd);
+              };
+              
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleEnd);
+              document.addEventListener('touchmove', handleTouchMove, { passive: false });
+              document.addEventListener('touchend', handleEnd);
+              
+              handleMove(e.clientX);
+            }}
+            onTouchStart={(e) => {
+              if (!onSliderChange) return;
+              e.preventDefault();
+              
+              const rect = e.currentTarget.getBoundingClientRect();
+              const startX = rect.left;
+              const width = rect.width;
+              
+              const handleMove = (clientX) => {
+                const x = clientX - startX;
+                const percentage = Math.max(0, Math.min(100, (x / width) * 100));
+                const newValue = Math.round((percentage / 100) * 10);
+                onSliderChange(newValue);
+              };
+              
+              handleMove(e.touches[0].clientX);
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              left: `calc(${(sliderValue / 10) * 100}% - 16px)`,
+              top: -7,
+              width: 32,
+              height: 32,
+              background: '#E94B5A',
+              borderRadius: '50%',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.13)',
+              border: '3px solid #fff',
+              transition: 'left 0.2s',
+              cursor: 'grab'
+            }} />
+            <div style={{
+              position: 'absolute',
+              top: 25,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#666'
+            }}>
+              {sliderValue}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* 두 번째 빨간 네모 박스 - 감정 끝말잇기 섹션 */}
       <div style={{
-        width: '90%',
-        background: 'white',
-        borderRadius: 18,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-        padding: '16px 10px',
-        marginBottom: 8,
-        fontSize: 18,
-        color: '#222',
-        textAlign: 'left',
-        minHeight: 90,
+        width: '100%',
+        background: '#B02B3A',
+        borderRadius: 15,
+        padding: '15px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 4
+        gap: '12px'
       }}>
-        <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 끝말잇기</div>
-        <div style={{ minHeight: 24 }}>
-          {keywords && keywords.length > 0 ? keywords.map((k, i) => (
-            <span key={i} style={{ marginRight: 8 }}>{k}</span>
-          )) : ''}
+        {/* 감정 끝말잇기 제목과 내용 */}
+        <div style={{
+          width: '100%',
+          background: 'white',
+          borderRadius: 18,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+          padding: '16px 15px',
+          fontSize: 18,
+          color: '#222',
+          textAlign: 'left',
+          minHeight: 90,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4
+        }}>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 끝말잇기</div>
+          <div style={{ minHeight: 24 }}>
+            {keywords && keywords.length > 0 ? keywords.map((k, i) => (
+              <span key={i} style={{ marginRight: 8 }}>{k}</span>
+            )) : ''}
+          </div>
         </div>
       </div>
+      
       <div style={{ flex: 1 }} />
     </div>
   );
