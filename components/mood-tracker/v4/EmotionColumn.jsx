@@ -1,10 +1,11 @@
 import React from 'react';
 
 function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderChange }) {
-  // 이모티콘 개수에 따른 박스 높이 계산
-  const baseHeight = 90; // 기본 높이
-  const emojiHeight = 65; // 이모티콘당 높이
-  const dynamicHeight = baseHeight + (Math.max(0, emojis.length - 1) * emojiHeight);
+  // 이모티콘 개수에 따른 동적 높이 계산
+  const baseEmojiHeight = 150; // 기본 이모티콘 영역 높이
+  const emojiHeight = 65; // 이모티콘당 추가 높이
+  const dynamicEmojiSectionHeight = baseEmojiHeight + (Math.max(0, emojis.length - 1) * emojiHeight);
+  const totalEmotionWeightHeight = dynamicEmojiSectionHeight + 80; // 제목과 패딩 포함
   
   return (
     <div style={{
@@ -29,7 +30,8 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
         marginTop: 22,
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px'
+        gap: '12px',
+        height: `${totalEmotionWeightHeight}px` // 동적 높이
       }}>
         {/* 감정 무게 제목 */}
         <div style={{
@@ -53,7 +55,7 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
           flexDirection: 'column',
           alignItems: 'center',
           padding: '18px 0',
-          minHeight: dynamicHeight
+          flex: 1
         }}>
           <div style={{ 
             fontSize: 60,
@@ -63,7 +65,8 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '0px'
+            gap: '0px',
+            flex: 1
           }}>
             {emojis.length > 0 ? emojis.map((emoji, index) => (
               <span key={index} style={{ 
@@ -173,9 +176,22 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
         padding: '15px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px'
+        gap: '12px',
+        height: '200px' // 고정 높이 유지
       }}>
-        {/* 감정 끝말잇기 제목과 내용 */}
+        {/* 감정 끝말잇기 제목 */}
+        <div style={{
+          width: '100%',
+          background: 'white',
+          color: '#222',
+          fontWeight: 700,
+          fontSize: 22,
+          borderRadius: 12,
+          textAlign: 'center',
+          padding: '10px 0'
+        }}>감정 끝말잇기</div>
+        
+        {/* 추가된 키워드 영역 */}
         <div style={{
           width: '100%',
           background: 'white',
@@ -184,17 +200,32 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
           padding: '16px 15px',
           fontSize: 18,
           color: '#222',
-          textAlign: 'left',
-          minHeight: 90,
+          textAlign: 'center',
           display: 'flex',
           flexDirection: 'column',
-          gap: 4
+          justifyContent: 'center',
+          alignItems: 'center',
+          flex: 1,
+          minHeight: '100px'
         }}>
-          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 6 }}>감정 끝말잇기</div>
-          <div style={{ minHeight: 24 }}>
+          <div style={{ 
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
             {keywords && keywords.length > 0 ? keywords.map((k, i) => (
-              <span key={i} style={{ marginRight: 8 }}>{k}</span>
-            )) : ''}
+              <span key={i} style={{ 
+                fontSize: 16,
+                padding: '4px 8px',
+                background: '#F0F0F0',
+                borderRadius: '8px',
+                marginRight: 4
+              }}>{k}</span>
+            )) : (
+              <span style={{ color: '#999', fontSize: 16 }}>키워드가 여기에 표시됩니다</span>
+            )}
           </div>
         </div>
       </div>

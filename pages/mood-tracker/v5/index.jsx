@@ -892,7 +892,7 @@ export default function MoodTrackerPage() {
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 100,
-        padding: '50px 40px 15px 40px',
+        padding: '15px 40px 15px 40px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
         {/* 왼쪽: 제목 */}
@@ -904,33 +904,42 @@ export default function MoodTrackerPage() {
           이모티콘을 이용해 오늘의 감정 무게를 측정하고 기록하세요
         </div>
         
-        {/* 오른쪽: 오늘의 감정 기록하기와 날짜 */}
+        {/* 빨간 구분선 */}
         <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: '5px'
+          width: '2px',
+          height: '40px',
+          background: '#B02B3A'
+        }}></div>
+        
+        {/* 중간: 오늘의 감정 기록하기 */}
+        <div style={{
+          color: '#333',
+          fontSize: '18px',
+          fontWeight: '600'
         }}>
-          <div style={{
-            color: '#333',
-            fontSize: '18px',
-            fontWeight: '600'
-          }}>
-            오늘의 감정 기록하기
-          </div>
-          <div style={{
-            color: '#666',
-            fontSize: '14px'
-          }}>
-            {getCurrentDateTime()}
-          </div>
+          오늘의 감정 기록하기
+        </div>
+        
+        {/* 빨간 구분선 */}
+        <div style={{
+          width: '2px',
+          height: '40px',
+          background: '#B02B3A'
+        }}></div>
+        
+        {/* 오른쪽: 날짜와 시간 */}
+        <div style={{
+          color: '#666',
+          fontSize: '14px'
+        }}>
+          {getCurrentDateTime()}
         </div>
       </div>
 
       {userInputText && (
         <div style={{
           position: 'absolute',
-          top: '60px', // 상단 헤더 아래로 이동
+          top: '50px', // 상단 헤더 아래로 이동 (조정된 위치에 맞춤)
           left: '50%',
           transform: 'translateX(-50%)',
           padding: '12px 25px',
@@ -955,7 +964,7 @@ export default function MoodTrackerPage() {
           onClick={handleStartGame}
           style={{
             position: 'absolute',
-            top: '110px', // 상단 헤더와 텍스트 아래로 이동
+            top: '100px', // 상단 헤더와 텍스트 아래로 이동 (조정된 위치에 맞춤)
             left: '50%',
             transform: 'translateX(-50%)',
             padding: '15px 30px',
