@@ -5,7 +5,8 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
   const baseEmojiHeight = 150; // 기본 이모티콘 영역 높이
   const emojiHeight = 65; // 이모티콘당 추가 높이
   const dynamicEmojiSectionHeight = baseEmojiHeight + (Math.max(0, emojis.length - 1) * emojiHeight);
-  const totalEmotionWeightHeight = dynamicEmojiSectionHeight + 80; // 제목과 패딩 포함
+  const minHeight = 280; // 최소 높이 보장 (슬라이더가 넘치지 않도록)
+  const totalEmotionWeightHeight = Math.max(minHeight, dynamicEmojiSectionHeight + 80); // 제목과 패딩 포함
   
   return (
     <div style={{
@@ -60,7 +61,7 @@ function EmotionColumn({ emojis = [], keywords = [], sliderValue = 5, onSliderCh
           <div style={{ 
             fontSize: 60,
             marginBottom: 10, 
-            minHeight: emojis.length > 0 ? (emojis.length * 65) : 72,
+            minHeight: emojis.length > 0 ? (emojis.length * 65) : 100, // 최소 높이 증가
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',

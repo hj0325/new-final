@@ -26,13 +26,19 @@ const BasketEmojiManager = ({
   const rightBasketCount = Math.min(rightCount, basketCapacity);
   const rightOverflowCount = Math.max(0, rightCount - basketCapacity);
   
-  // 바구니의 실제 크기 (ScaledScene의 스케일링 고려)
-  const ACTUAL_BASKET_RADIUS = 0.3; // 실제 바구니 반지름 (약간 여유를 둠)
-  const SAFE_MARGIN = 0.05; // 여유 공간
+  // 바구니의 실제 크기 (ScaledScene의 스케일링 고려) - 컴포넌트 외부로 이동
+  const ACTUAL_BASKET_RADIUS = 0.25; // 실제 바구니 반지름 (조정됨)
+  const SAFE_MARGIN = 0.03; // 여유 공간 (줄임)
   const USABLE_RADIUS = ACTUAL_BASKET_RADIUS - SAFE_MARGIN;
   
   // 왼쪽 바구니 이모티콘들 생성
   const leftEmojis = useMemo(() => {
+    console.log('🔍 Left Basket Debug:', {
+      leftBasketCount,
+      leftEmojiTypes,
+      leftBasketX,
+      zPositionOffset
+    });
     const emojis = [];
     
     for (let i = 0; i < leftBasketCount; i++) {
@@ -52,10 +58,12 @@ const BasketEmojiManager = ({
       const localX = Math.cos(angle) * actualRadius;
       const localZ = Math.sin(angle) * actualRadius;
       
-      // 랜덤 요소를 매우 작게 제한
+      // 일관된 시드 기반 랜덤 요소 - 인덱스를 시드로 사용하여 일관성 보장
+      const seedBasedRandomX = (Math.sin(i * 12.9898) * 43758.5453123) % 1;
+      const seedBasedRandomZ = (Math.sin(i * 78.233) * 43758.5453123) % 1;
       const smallRandomness = Math.min(randomnessRange * 0.2, 0.03);
-      const randomX = (Math.random() - 0.5) * smallRandomness;
-      const randomZ = (Math.random() - 0.5) * smallRandomness;
+      const randomX = (seedBasedRandomX - 0.5) * smallRandomness;
+      const randomZ = (seedBasedRandomZ - 0.5) * smallRandomness;
       
       // 최종 위치 계산 (바구니 중심 기준)
       const x = leftBasketX + localX + randomX;
@@ -64,7 +72,7 @@ const BasketEmojiManager = ({
       
       // 바구니 경계 체크 - 반지름을 벗어나면 중심으로 끌어당김
       const distanceFromCenter = Math.sqrt(
-        Math.pow(x - leftBasketX, 2) + Math.pow(z - zPositionOffset, 2)
+        Math.pow(localX + randomX, 2) + Math.pow(localZ + randomZ, 2)
       );
       
       let finalX = x;
@@ -72,8 +80,8 @@ const BasketEmojiManager = ({
       
       if (distanceFromCenter > USABLE_RADIUS) {
         const ratio = USABLE_RADIUS / distanceFromCenter;
-        finalX = leftBasketX + (x - leftBasketX) * ratio;
-        finalZ = zPositionOffset + (z - zPositionOffset) * ratio;
+        finalX = leftBasketX + (localX + randomX) * ratio;
+        finalZ = zPositionOffset + (localZ + randomZ) * ratio;
       }
       
       emojis.push({
@@ -87,6 +95,12 @@ const BasketEmojiManager = ({
 
   // 오른쪽 바구니 이모티콘들 생성
   const rightEmojis = useMemo(() => {
+    console.log('🔍 Right Basket Debug:', {
+      rightBasketCount,
+      rightEmojiTypes,
+      rightBasketX,
+      zPositionOffset
+    });
     const emojis = [];
     
     for (let i = 0; i < rightBasketCount; i++) {
@@ -106,10 +120,12 @@ const BasketEmojiManager = ({
       const localX = Math.cos(angle) * actualRadius;
       const localZ = Math.sin(angle) * actualRadius;
       
-      // 랜덤 요소를 매우 작게 제한
+      // 일관된 시드 기반 랜덤 요소 - 오른쪽 바구니 전용 시드 (1000을 더해서 차별화)
+      const seedBasedRandomX = (Math.sin((i + 1000) * 12.9898) * 43758.5453123) % 1;
+      const seedBasedRandomZ = (Math.sin((i + 1000) * 78.233) * 43758.5453123) % 1;
       const smallRandomness = Math.min(randomnessRange * 0.2, 0.03);
-      const randomX = (Math.random() - 0.5) * smallRandomness;
-      const randomZ = (Math.random() - 0.5) * smallRandomness;
+      const randomX = (seedBasedRandomX - 0.5) * smallRandomness;
+      const randomZ = (seedBasedRandomZ - 0.5) * smallRandomness;
       
       // 최종 위치 계산 (바구니 중심 기준)
       const x = rightBasketX + localX + randomX;
@@ -118,7 +134,7 @@ const BasketEmojiManager = ({
       
       // 바구니 경계 체크 - 반지름을 벗어나면 중심으로 끌어당김
       const distanceFromCenter = Math.sqrt(
-        Math.pow(x - rightBasketX, 2) + Math.pow(z - zPositionOffset, 2)
+        Math.pow(localX + randomX, 2) + Math.pow(localZ + randomZ, 2)
       );
       
       let finalX = x;
@@ -126,8 +142,8 @@ const BasketEmojiManager = ({
       
       if (distanceFromCenter > USABLE_RADIUS) {
         const ratio = USABLE_RADIUS / distanceFromCenter;
-        finalX = rightBasketX + (x - rightBasketX) * ratio;
-        finalZ = zPositionOffset + (z - zPositionOffset) * ratio;
+        finalX = rightBasketX + (localX + randomX) * ratio;
+        finalZ = zPositionOffset + (localZ + randomZ) * ratio;
       }
       
       emojis.push({

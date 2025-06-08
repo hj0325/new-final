@@ -1010,20 +1010,30 @@ export default function MoodTrackerPage() {
 
   return (
     <FullScreenContainer>
-      {/* 상단 헤더 정보 */}
+      {/* 상단 헤더 바 (배경만) */}
       <div style={{
         position: 'absolute',
         top: '-40px',
         left: '0px',
         width: '100%',
         background: '#F5E6A8',
-        border: '3px solid #B02B3A',
+        border: '5px solid #B02B3A',
+        height: '80px', // 원래 두께로 복원
+        zIndex: 99,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      }}></div>
+
+      {/* 상단 헤더 텍스트들 (별도 위치) */}
+      <div style={{
+        position: 'absolute',
+        top: '-15px', // 더 아래로 이동
+        left: '0px',
+        width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 100,
-        padding: '15px 40px 15px 40px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        padding: '15px 40px 15px 40px'
       }}>
         {/* 왼쪽: 제목 */}
         <div style={{
@@ -1036,7 +1046,7 @@ export default function MoodTrackerPage() {
         
         {/* 빨간 구분선 */}
         <div style={{
-          width: '2px',
+          width: '6px',
           height: '40px',
           background: '#B02B3A'
         }}></div>
@@ -1052,7 +1062,7 @@ export default function MoodTrackerPage() {
         
         {/* 빨간 구분선 */}
         <div style={{
-          width: '2px',
+          width: '6px',
           height: '40px',
           background: '#B02B3A'
         }}></div>
@@ -1094,7 +1104,7 @@ export default function MoodTrackerPage() {
           onClick={handleStartGame}
           style={{
             position: 'absolute',
-            top: '100px', // 상단 헤더와 텍스트 아래로 이동 (조정된 위치에 맞춤)
+            bottom: '260px', // 하단 이모티콘 위쪽으로 이동
             left: '50%',
             transform: 'translateX(-50%)',
             padding: '15px 30px',
