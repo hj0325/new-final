@@ -348,6 +348,7 @@ const getShapeModelPath = (shapeInfo) => {
   const pathMap = {
     '파란 네모': '/box.gltf',
     '빨간 길쭉이': '/clinder.gltf',
+    '분홍 둥글이': '/circle.gltf',
     '노란 뾰족이': '/hexagon.gltf',
     '초록 별': '/star.gltf'
   };
@@ -528,6 +529,10 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
       name: '빨간 길쭉이',
       description: '나는 길쭉길쭉하고 동글동글하지만 강해!'
     },
+    'circle': {
+      name: '분홍 둥글이',
+      description: '나는 둥그렇게 돌아가지! 때에 따라 다양한 모습으로 변할 수 있어'
+    },
     'hexagon': {
       name: '노란 뾰족이',
       description: '나는 뾰족뾰족! 날카롭지만 다양한 모습을 가지고 있어'
@@ -682,44 +687,54 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             {/* 하단의 3D 이모티콘들 - 메인 페이지와 동일한 위치와 크기 */}
             <EmojiSelector3D onEmojiClick={() => {}} />
             
-            {/* 4개의 3D 모델들을 중앙 주변에 배치 */}
+            {/* 5개의 3D 모델들을 중앙 주변에 배치 */}
             <FloatingModel 
               url="/box.gltf" 
-              position={[-4, 0, 0]} 
+              position={[-3.2, 0, 0]} 
               rotationSpeed={0.008}
               floatSpeed={0.015}
               floatAmplitude={0.3}
-              scale={[1,1,1]}
+              scale={[0.8, 0.8, 0.8]}
               onClick={handleShapeClick}
               shapeId="box"
             />
             <FloatingModel 
               url="/clinder.gltf" 
-              position={[-1.3, 0, 0]} 
+              position={[-1.6, 0, 0]} 
               rotationSpeed={0.012}
               floatSpeed={0.02}
               floatAmplitude={0.4}
-              scale={[1,1,1]}
+              scale={[0.8, 0.8, 0.8]}
               onClick={handleShapeClick}
               shapeId="cylinder"
             />
             <FloatingModel 
+              url="/circle.gltf" 
+              position={[0, 0, 0]} 
+              rotationSpeed={0.009}
+              floatSpeed={0.016}
+              floatAmplitude={0.38}
+              scale={[0.8, 0.8, 0.8]}
+              onClick={handleShapeClick}
+              shapeId="circle"
+            />
+            <FloatingModel 
               url="/hexagon.gltf" 
-              position={[1.3, 0, 0]} 
+              position={[1.6, 0, 0]} 
               rotationSpeed={0.01}
               floatSpeed={0.018}
               floatAmplitude={0.35}
-              scale={[1,1,1]}
+              scale={[0.8, 0.8, 0.8]}
               onClick={handleShapeClick}
               shapeId="hexagon"
             />
             <FloatingModel 
               url="/star.gltf" 
-              position={[4, 0, 0]} 
+              position={[3.2, 0, 0]} 
               rotationSpeed={0.015}
               floatSpeed={0.025}
               floatAmplitude={0.45}
-              scale={[1,1,1]}
+              scale={[0.8, 0.8, 0.8]}
               onClick={handleShapeClick}
               shapeId="star"
             />

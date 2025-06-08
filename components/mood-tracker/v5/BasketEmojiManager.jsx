@@ -33,12 +33,6 @@ const BasketEmojiManager = ({
   
   // 왼쪽 바구니 이모티콘들 생성
   const leftEmojis = useMemo(() => {
-    console.log('🔍 Left Basket Debug:', {
-      leftBasketCount,
-      leftEmojiTypes,
-      leftBasketX,
-      zPositionOffset
-    });
     const emojis = [];
     
     for (let i = 0; i < leftBasketCount; i++) {
@@ -95,12 +89,6 @@ const BasketEmojiManager = ({
 
   // 오른쪽 바구니 이모티콘들 생성
   const rightEmojis = useMemo(() => {
-    console.log('🔍 Right Basket Debug:', {
-      rightBasketCount,
-      rightEmojiTypes,
-      rightBasketX,
-      zPositionOffset
-    });
     const emojis = [];
     
     for (let i = 0; i < rightBasketCount; i++) {
