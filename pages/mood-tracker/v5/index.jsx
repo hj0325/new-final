@@ -543,12 +543,33 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
     }
   };
 
+  // 이모티콘과 도형 연결 매핑 (기쁨-파란 네모 / 놀람-빨간 기둥 / 무표정-분홍 둥글이 / 슬픔-노란 뾰족이 / 화남-초록 별)
+  const emojiToShapeMap = {
+    'joy': 'box',        // 기쁨 -> 파란 네모
+    'surprise': 'cylinder', // 놀람 -> 빨간 기둥
+    'neutral': 'circle',    // 무표정 -> 분홍 둥글이
+    'sadness': 'hexagon',   // 슬픔 -> 노란 뾰족이
+    'anger': 'star'         // 화남 -> 초록 별
+  };
+
   const handleShapeClick = (shapeId) => {
     console.log(`handleShapeClick called with shapeId: ${shapeId}`); // 디버깅용
     const shapeInfo = shapeInfoMap[shapeId];
     console.log('Shape info:', shapeInfo); // 디버깅용
     setSelectedShapeInfo(shapeInfo);
     setIsShapeGameModalOpen(true);
+  };
+
+  // 이모티콘 클릭 핸들러 - 연결된 도형의 설명창을 엽니다
+  const handleEmojiClick = (emojiId) => {
+    console.log(`handleEmojiClick called with emojiId: ${emojiId}`); // 디버깅용
+    const shapeId = emojiToShapeMap[emojiId];
+    if (shapeId) {
+      const shapeInfo = shapeInfoMap[shapeId];
+      console.log('Shape info from emoji click:', shapeInfo); // 디버깅용
+      setSelectedShapeInfo(shapeInfo);
+      setIsShapeGameModalOpen(true);
+    }
   };
 
   const closeShapeGameModal = () => {
@@ -629,7 +650,8 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
           flexWrap: 'wrap',
           gap: '8px',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginBottom: '15px'
         }}>
           {dominantKeywords && dominantKeywords.length > 0 ? (
             dominantKeywords.map((keyword, index) => (
@@ -649,6 +671,17 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
               감정 키워드가 없습니다
             </span>
           )}
+        </div>
+        
+        {/* 추가 설명 문구 */}
+        <div style={{
+          fontSize: '18px',
+          color: '#555',
+          textAlign: 'center',
+          fontWeight: '500',
+          lineHeight: '1.4'
+        }}>
+          도형의 성격을 알아보고 감정 생물 만들기 시작
         </div>
       </div>
       
@@ -685,12 +718,12 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             ))}
             
             {/* 하단의 3D 이모티콘들 - 메인 페이지와 동일한 위치와 크기 */}
-            <EmojiSelector3D onEmojiClick={() => {}} />
+            <EmojiSelector3D onEmojiClick={handleEmojiClick} />
             
-            {/* 5개의 3D 모델들을 중앙 주변에 배치 */}
+            {/* 5개의 3D 모델들을 중앙 주변에 배치 - 간격을 더 넓혀줌 */}
             <FloatingModel 
               url="/box.gltf" 
-              position={[-3.2, 0, 0]} 
+              position={[-3.6, 0, 0]} 
               rotationSpeed={0.008}
               floatSpeed={0.015}
               floatAmplitude={0.3}
@@ -700,7 +733,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             />
             <FloatingModel 
               url="/clinder.gltf" 
-              position={[-1.6, 0, 0]} 
+              position={[-1.8, 0, 0]} 
               rotationSpeed={0.012}
               floatSpeed={0.02}
               floatAmplitude={0.4}
@@ -720,7 +753,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             />
             <FloatingModel 
               url="/hexagon.gltf" 
-              position={[1.6, 0, 0]} 
+              position={[1.8, 0, 0]} 
               rotationSpeed={0.01}
               floatSpeed={0.018}
               floatAmplitude={0.35}
@@ -730,7 +763,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
             />
             <FloatingModel 
               url="/star.gltf" 
-              position={[3.2, 0, 0]} 
+              position={[3.6, 0, 0]} 
               rotationSpeed={0.015}
               floatSpeed={0.025}
               floatAmplitude={0.45}
