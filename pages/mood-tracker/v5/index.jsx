@@ -1,4 +1,4 @@
-import React, { useState, Suspense, useRef, useMemo } from 'react';
+import React, { useState, Suspense, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, OrthographicCamera, useGLTF } from '@react-three/drei';
 import { Physics, RigidBody } from '@react-three/rapier';
@@ -614,6 +614,43 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
         }
       `}</style>
       
+      {/* 뒤로 가기 버튼 */}
+      <button
+        onClick={onBack}
+        style={{
+          position: 'absolute',
+          top: '30px',
+          left: '30px',
+          width: '50px',
+          height: '50px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          border: '5px solid #B02B3A',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '24px',
+          color: '#B02B3A',
+          fontWeight: 'bold',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 100,
+          transition: 'all 0.2s ease'
+        }}
+        onMouseOver={(e) => {
+          e.target.style.background = '#B02B3A';
+          e.target.style.color = 'white';
+          e.target.style.transform = 'scale(1.1)';
+        }}
+        onMouseOut={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+          e.target.style.color = '#B02B3A';
+          e.target.style.transform = 'scale(1)';
+        }}
+              >
+          ⬅
+        </button>
+
       {/* 상단에 우세한 이모티콘과 키워드 표시 */}
       <div style={{
         position: 'absolute',
@@ -802,6 +839,7 @@ export default function MoodTrackerPage() {
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
   const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
   const [showColumns, setShowColumns] = useState(false); // 양쪽 칼럼 표시 상태
+  const audioRef = useRef(null); // 배경음악을 위한 ref
   
   // Leva를 사용한 바구니 이모티콘 조정 컨트롤
   const { 
@@ -964,7 +1002,73 @@ export default function MoodTrackerPage() {
 
   const handleBackToMain = () => {
     setShowCreationPage(false);
+    setShowLanding(true);
+    // 관련 상태들도 초기화
+    setShowColumns(false);
+    setPositiveEmojis([]);
+    setNegativeEmojis([]);
+    setPositiveKeywords([]);
+    setNegativeKeywords([]);
+    setLeftSliderValue(3);
+    setRightSliderValue(7);
+    
+    // 배경음악이 계속 재생되도록 보장
+    setTimeout(() => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.play().catch(error => {
+          console.log('뒤로가기 시 오디오 재생 실패:', error);
+        });
+      }
+    }, 100);
   };
+
+  // 배경음악 초기화 및 재생
+  useEffect(() => {
+    const initializeAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.volume = 0.3; // 볼륨 설정 (0.0 ~ 1.0)
+        audioRef.current.loop = true; // 반복 재생
+      audioRef.current.preload = 'auto'; // 자동 미리 로드
+        
+        // 사용자 상호작용 후 재생하기 위한 함수
+        const playAudio = () => {
+          if (audioRef.current && audioRef.current.paused) {
+            audioRef.current.play().catch(error => {
+              console.log('오디오 재생 실패:', error);
+            });
+          }
+        };
+
+        // 클릭 이벤트 리스너 등록 (한 번만)
+        document.addEventListener('click', playAudio, { once: true });
+        
+        return () => {
+          document.removeEventListener('click', playAudio);
+        };
+      }
+    };
+
+    initializeAudio();
+  }, []);
+
+  // 페이지 전환 시에도 음악이 계속 재생되도록 보장
+  useEffect(() => {
+    const ensureAudioPlaying = () => {
+      if (audioRef.current) {
+        // 음악이 일시정지되어 있으면 다시 재생
+        if (audioRef.current.paused && audioRef.current.readyState >= 2) {
+          audioRef.current.play().catch(error => {
+            console.log('페이지 전환 시 오디오 재생 실패:', error);
+          });
+        }
+      }
+    };
+
+    // 약간의 지연을 두고 음악 재생 확인
+    const timer = setTimeout(ensureAudioPlaying, 100);
+    
+    return () => clearTimeout(timer);
+  }, [showLanding, showCreationPage]);
 
   // 우세한 이모티콘들 결정 (슬라이더 값 기반으로 변경)
   const dominantEmojis = leftSliderValue > rightSliderValue ? positiveEmojis : negativeEmojis;
@@ -977,27 +1081,39 @@ export default function MoodTrackerPage() {
   // Implementation of showCreationPage
   if (showCreationPage) {
     return (
-      <CreationPage
-        onBack={handleBackToMain}
-        keyword={userInputText || '감정'}
-        dominantEmojis={dominantEmojis}
-        dominantKeywords={dominantKeywords}
-      />
+      <>
+        <CreationPage
+          onBack={handleBackToMain}
+          keyword={userInputText || '감정'}
+          dominantEmojis={dominantEmojis}
+          dominantKeywords={dominantKeywords}
+        />
+        
+        {/* 배경음악 - 세번째 화면에서도 계속 재생 */}
+        <audio 
+          ref={audioRef} 
+          preload="auto"
+          src="/bgm.mp3"
+          style={{ display: 'none' }}
+          loop
+        />
+      </>
     );
   }
 
   if (showLanding) {
     return (
-      <div style={{
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        background: 'url(/first.png) center/cover no-repeat',
-        flexDirection: 'column',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
+      <>
+        <div style={{
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          background: 'url(/first.png) center/cover no-repeat',
+          flexDirection: 'column',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
           <Canvas>
             <OrthographicCamera
@@ -1038,7 +1154,17 @@ export default function MoodTrackerPage() {
           onTextChange={setUserInputText}
           onSubmit={handleTextInputSubmit}
         />
-      </div>
+        </div>
+        
+        {/* 배경음악 - 모든 페이지에서 공통으로 사용 */}
+        <audio 
+          ref={audioRef} 
+          preload="auto"
+          src="/bgm.mp3"
+          style={{ display: 'none' }}
+          loop
+        />
+      </>
     );
   }
 
@@ -1057,7 +1183,8 @@ export default function MoodTrackerPage() {
   };
 
   return (
-    <FullScreenContainer>
+    <>
+      <FullScreenContainer>
       {/* 상단 헤더 바 (배경만) */}
       <div style={{
         position: 'absolute',
@@ -1261,6 +1388,16 @@ export default function MoodTrackerPage() {
         onClose={closeGameCreationModal}
         onStart={handleStartCreation}
       />
-    </FullScreenContainer>
+      </FullScreenContainer>
+      
+      {/* 배경음악 - 모든 페이지에서 공통으로 사용 */}
+      <audio 
+        ref={audioRef} 
+        preload="auto"
+        src="/bgm.mp3"
+        style={{ display: 'none' }}
+        loop
+      />
+    </>
   );
 }
