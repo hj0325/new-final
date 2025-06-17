@@ -517,6 +517,18 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
   const [selectedShapeInfo, setSelectedShapeInfo] = useState(null);
   const [selectedShapes, setSelectedShapes] = useState([]); // 선택된 도형들 저장
 
+  // 도형 ID에서 모델 경로 반환하는 함수
+  const getShapeModelPathById = (shapeId) => {
+    const shapeModels = {
+      'box': '/box.gltf',
+      'cylinder': '/clinder.gltf',
+      'circle': '/circle.gltf',
+      'hexagon': '/hexagon.gltf',
+      'star': '/star.gltf'
+    };
+    return shapeModels[shapeId] || '/box.gltf';
+  };
+
   // 도형 정보 정의
   const shapeInfoMap = {
     'box': {
@@ -661,7 +673,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
         transform: 'translateY(-50%)',
         width: '250px',
         height: '80%',
-        background: 'rgba(255, 255, 255, 0.9)',
+        background: '#87CEEB', // 하늘색 배경으로 변경
         borderRadius: '20px',
         padding: '20px',
         boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
@@ -674,10 +686,10 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
           textAlign: 'center',
           fontSize: '18px',
           fontWeight: 'bold',
-          color: '#333',
+          color: 'black', // 텍스트 색상을 검은색으로 변경
           marginBottom: '20px',
           padding: '10px',
-          background: '#E8F5E8',
+          background: 'white', // 완전 흰색 배경
           borderRadius: '10px'
         }}>
           감정 생물 만들기
@@ -688,21 +700,21 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
           textAlign: 'center',
           fontSize: '16px',
           fontWeight: '600',
-          color: '#666',
+          color: 'black', // 텍스트 색상을 검은색으로 변경
           marginBottom: '15px',
           padding: '8px',
-          background: '#F0F8FF',
+          background: 'white', // 완전 흰색 배경
           borderRadius: '8px'
         }}>
           도형의 성격
         </div>
 
-        {/* 선택되지 않은 도형들 세로 나열 */}
+                {/* 선택되지 않은 도형들 세로 나열 */}
         <div style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          gap: '15px',
           overflowY: 'auto'
         }}>
           {unselectedShapes.map((shapeId) => {
@@ -712,31 +724,45 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
                 key={shapeId}
                 onClick={() => handleShapeClick(shapeId)}
                 style={{
-                  padding: '12px',
-                  background: 'rgba(255, 255, 255, 0.8)',
+                  height: '120px', // 높이를 100px에서 120px로 더 증가
+                  background: 'rgba(255, 255, 255, 0.9)',
                   borderRadius: '10px',
-                  border: '2px solid #ddd',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
                   cursor: 'pointer',
                   textAlign: 'center',
                   transition: 'all 0.2s ease',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '5px'
+                  justifyContent: 'center',
+                  position: 'relative'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(135, 206, 235, 0.3)';
-                  e.target.style.borderColor = '#87CEEB';
-                  e.target.style.transform = 'scale(1.02)';
+                  e.target.style.background = 'rgba(255, 255, 255, 1)';
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+                  e.target.style.transform = 'scale(1.05)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.8)';
-                  e.target.style.borderColor = '#ddd';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
                   e.target.style.transform = 'scale(1)';
                 }}
               >
-                <div style={{ fontSize: '24px' }}>{shapeInfo.emoji}</div>
-                <div style={{ fontSize: '12px', color: '#666' }}>{shapeInfo.name}</div>
+                <Canvas camera={{ position: [0, 0, 3], fov: 50 }} style={{ width: '100%', height: '100%' }}>
+                  <Suspense fallback={null}>
+                    <ambientLight intensity={0.7} />
+                    <directionalLight position={[2, 2, 2]} intensity={1} />
+                    <FloatingModel
+                       url={getShapeModelPathById(shapeId)}
+                       position={[0, 0, 0]}
+                       rotationSpeed={0.02}
+                       floatSpeed={0.05}
+                       floatAmplitude={0.1}
+                       scale={[1.2, 1.2, 1.2]} // 스케일을 0.8에서 1.2로 증가
+                       onClick={handleShapeClick}
+                       shapeId={shapeId}
+                     />
+                  </Suspense>
+                </Canvas>
               </div>
             );
           })}
