@@ -650,7 +650,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
               >
           ⬅
         </button>
-
+      
       {/* 상단에 우세한 이모티콘과 키워드 표시 */}
       <div style={{
         position: 'absolute',
@@ -834,8 +834,9 @@ export default function MoodTrackerPage() {
   const [negativeEmojis, setNegativeEmojis] = useState([]); // 부정 이모티콘들
   const [positiveKeywords, setPositiveKeywords] = useState([]); // 긍정 키워드들
   const [negativeKeywords, setNegativeKeywords] = useState([]); // 부정 키워드들
-  const [leftSliderValue, setLeftSliderValue] = useState(3);
-  const [rightSliderValue, setRightSliderValue] = useState(7);
+  const [leftSliderValue, setLeftSliderValue] = useState(0);
+  const [rightSliderValue, setRightSliderValue] = useState(0);
+  const [showInstructions, setShowInstructions] = useState(true);
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
   const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
   const [showColumns, setShowColumns] = useState(false); // 양쪽 칼럼 표시 상태
@@ -949,6 +950,11 @@ export default function MoodTrackerPage() {
   const wingsPrimitiveOffset = [0, 0, 0];
 
   const handleEmoji3DClick = (emojiId) => {
+    // 처음 이모티콘 클릭시 안내 문구 숨기기
+    if (showInstructions) {
+      setShowInstructions(false);
+    }
+    
     const emojiChar = emojiIdToChar[emojiId];
     if (emojiChar) {
       setSelectedEmojiForGameModal(emojiChar);
@@ -1009,8 +1015,8 @@ export default function MoodTrackerPage() {
     setNegativeEmojis([]);
     setPositiveKeywords([]);
     setNegativeKeywords([]);
-    setLeftSliderValue(3);
-    setRightSliderValue(7);
+    setLeftSliderValue(0);
+    setRightSliderValue(0);
     
     // 배경음악이 계속 재생되도록 보장
     setTimeout(() => {
@@ -1082,12 +1088,12 @@ export default function MoodTrackerPage() {
   if (showCreationPage) {
     return (
       <>
-        <CreationPage
-          onBack={handleBackToMain}
-          keyword={userInputText || '감정'}
-          dominantEmojis={dominantEmojis}
-          dominantKeywords={dominantKeywords}
-        />
+      <CreationPage
+        onBack={handleBackToMain}
+        keyword={userInputText || '감정'}
+        dominantEmojis={dominantEmojis}
+        dominantKeywords={dominantKeywords}
+      />
         
         {/* 배경음악 - 세번째 화면에서도 계속 재생 */}
         <audio 
@@ -1104,16 +1110,16 @@ export default function MoodTrackerPage() {
   if (showLanding) {
     return (
       <>
-        <div style={{
-          width: '100vw',
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          background: 'url(/first.png) center/cover no-repeat',
-          flexDirection: 'column',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
+      <div style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        background: 'url(/first.png) center/cover no-repeat',
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 2 }}>
           <Canvas>
             <OrthographicCamera
@@ -1154,7 +1160,7 @@ export default function MoodTrackerPage() {
           onTextChange={setUserInputText}
           onSubmit={handleTextInputSubmit}
         />
-        </div>
+      </div>
         
         {/* 배경음악 - 모든 페이지에서 공통으로 사용 */}
         <audio 
@@ -1184,94 +1190,7 @@ export default function MoodTrackerPage() {
 
   return (
     <>
-      <FullScreenContainer>
-      {/* 상단 헤더 바 (배경만) */}
-      <div style={{
-        position: 'absolute',
-        top: '-40px',
-        left: '0px',
-        width: '100%',
-        background: '#F5E6A8',
-        border: '5px solid #B02B3A',
-        height: '80px', // 원래 두께로 복원
-        zIndex: 99,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}></div>
-
-      {/* 상단 헤더 텍스트들 (별도 위치) */}
-      <div style={{
-        position: 'absolute',
-        top: '-15px', // 더 아래로 이동
-        left: '0px',
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        zIndex: 100,
-        padding: '15px 40px 15px 40px'
-      }}>
-        {/* 왼쪽: 제목 */}
-        <div style={{
-          color: '#333',
-          fontSize: '18px',
-          fontWeight: '600'
-        }}>
-          이모티콘을 이용해 오늘의 감정 무게를 측정하고 기록하세요
-        </div>
-        
-        {/* 빨간 구분선 */}
-        <div style={{
-          width: '6px',
-          height: '40px',
-          background: '#B02B3A'
-        }}></div>
-        
-        {/* 중간: 오늘의 감정 기록하기 */}
-        <div style={{
-          color: '#333',
-          fontSize: '18px',
-          fontWeight: '600'
-        }}>
-          오늘의 감정 기록하기
-        </div>
-        
-        {/* 빨간 구분선 */}
-        <div style={{
-          width: '6px',
-          height: '40px',
-          background: '#B02B3A'
-        }}></div>
-        
-        {/* 오른쪽: 날짜와 시간 */}
-        <div style={{
-          color: '#666',
-          fontSize: '14px'
-        }}>
-          {getCurrentDateTime()}
-        </div>
-      </div>
-
-      {userInputText && (
-        <div style={{
-          position: 'absolute',
-          top: '50px', // 상단 헤더 아래로 이동 (조정된 위치에 맞춤)
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '12px 25px',
-          background: 'rgba(255, 255, 255, 0.85)',
-          borderRadius: '12px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-          fontSize: '20px',
-          fontWeight: '500',
-          color: '#333',
-          zIndex: 100,
-          textAlign: 'center',
-          minWidth: '200px',
-          maxWidth: '80%',
-        }}>
-          {userInputText}
-        </div>
-      )}
+    <FullScreenContainer>
       
       {/* 만들기 시작 버튼 - 이모티콘이 있고 슬라이더가 조작되었을 때만 표시 */}
       {showColumns && (positiveEmojis.length > 0 || negativeEmojis.length > 0) && (
@@ -1372,6 +1291,27 @@ export default function MoodTrackerPage() {
           </Suspense>
         </Canvas>
       </div>
+      {showInstructions && (
+        <div style={{
+          position: 'absolute',
+          bottom: '230px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '15px 30px',
+          background: 'rgba(135, 206, 235, 0.6)',
+          color: 'white',
+          borderRadius: '25px',
+          fontSize: '18px',
+          fontWeight: '500',
+          zIndex: 100,
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          fontFamily: 'Arial, sans-serif',
+        }}>
+          이모티콘을 클릭하고 오늘의 감정을 입력하세요
+        </div>
+      )}
       <GameModal 
         isOpen={isGameModalOpen} 
         emoji={selectedEmojiForGameModal} 
@@ -1388,7 +1328,7 @@ export default function MoodTrackerPage() {
         onClose={closeGameCreationModal}
         onStart={handleStartCreation}
       />
-      </FullScreenContainer>
+    </FullScreenContainer>
       
       {/* 배경음악 - 모든 페이지에서 공통으로 사용 */}
       <audio 

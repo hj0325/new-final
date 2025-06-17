@@ -40,10 +40,12 @@ function Emoji3D({ modelPath, initialPosition = [0, 0, 0], scale = 0.5, onClick,
   const handlePointerOver = (event) => {
     event.stopPropagation();
     setIsHovered(true);
+    document.body.style.cursor = 'pointer';
   };
 
   const handlePointerOut = () => {
     setIsHovered(false);
+    document.body.style.cursor = 'default';
   };
 
   return (

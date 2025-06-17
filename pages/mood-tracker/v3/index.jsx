@@ -49,12 +49,18 @@ export default function MoodTrackerPage() {
   const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false);
   const [userInputText, setUserInputText] = useState('');
   const [droppedEmojis, setDroppedEmojis] = useState([]);
+  const [showInstructions, setShowInstructions] = useState(true);
 
   const bodyProps = { position: [0, 0.5, 0], scale: 1.9, rotation: [0, 0, 0] };
   const wingsProps = { position: [0, -0.02, 0], scale: 1.1, rotation: [0, 0, 0] };
   const wingsPrimitiveOffset = [0, 0, 0];
 
   const handleEmoji3DClick = (emojiId) => {
+    // 처음 이모티콘 클릭시 안내 문구 숨기기
+    if (showInstructions) {
+      setShowInstructions(false);
+    }
+    
     const emojiChar = emojiIdToChar[emojiId];
     if (emojiChar) {
       setSelectedEmojiForGameModal(emojiChar);
@@ -168,30 +174,9 @@ export default function MoodTrackerPage() {
 
   return (
     <FullScreenContainer>
-      {userInputText && (
-        <div style={{
-          position: 'absolute',
-          top: '30px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '12px 25px',
-          background: 'rgba(255, 255, 255, 0.85)',
-          borderRadius: '12px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-          fontSize: '20px',
-          fontWeight: '500',
-          color: '#333',
-          zIndex: 100,
-          textAlign: 'center',
-          minWidth: '200px',
-          maxWidth: '80%',
-        }}>
-          {userInputText}
-        </div>
-      )}
       <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
-        <EmotionColumn emoji="😀" keywords={keywords} sliderValue={30} />
-        <EmotionColumn emoji="😞" keywords={keywords} sliderValue={70} />
+        <EmotionColumn emoji="😀" keywords={keywords} sliderValue={0} />
+        <EmotionColumn emoji="😞" keywords={keywords} sliderValue={0} />
       </div>
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
@@ -236,6 +221,27 @@ export default function MoodTrackerPage() {
           </Suspense>
         </Canvas>
       </div>
+      {showInstructions && (
+        <div style={{
+          position: 'absolute',
+          bottom: '120px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '15px 30px',
+          background: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          borderRadius: '25px',
+          fontSize: '18px',
+          fontWeight: '500',
+          zIndex: 100,
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          fontFamily: 'Arial, sans-serif',
+        }}>
+          이모티콘을 클릭하고 오늘의 감정을 입력하세요
+        </div>
+      )}
       <GameModal isOpen={isGameModalOpen} emoji={selectedEmojiForGameModal} onClose={closeGameModal} />
     </FullScreenContainer>
   );

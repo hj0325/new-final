@@ -9,7 +9,7 @@ const FullScreenContainer = ({ children }) => (
     justifyContent: 'center',
     gap: '10px',
     alignItems: 'center',
-    background: '#000000',
+    background: 'linear-gradient(135deg, #87CEEB 0%, #87CEFA 50%, #B0E0E6 100%)',
     overflow: 'hidden',
     position: 'relative'
   }}>
