@@ -343,6 +343,28 @@ colliders="cuboid"
   );
 };
 
+// 떨어지는 3D 이모티콘 컴포넌트
+const FallingEmoji = ({ emojiId, position, scale = [0.8, 0.8, 0.8] }) => {
+  const modelPath = `/models/emotion${{'joy': 1, 'surprise': 2, 'neutral': 3, 'sadness': 4, 'anger': 5}[emojiId] || 1}.gltf`;
+  const { scene } = useGLTF(modelPath);
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+
+  return (
+    <RigidBody 
+      type="dynamic" 
+      position={position}
+      colliders="hull"
+      restitution={0.4}
+      friction={0.6}
+    >
+      <primitive 
+        object={clonedScene} 
+        scale={scale}
+      />
+    </RigidBody>
+  );
+};
+
 // 도형별 모델 경로 반환 함수
 const getShapeModelPath = (shapeInfo) => {
   const pathMap = {
@@ -516,6 +538,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
   const [isShapeGameModalOpen, setIsShapeGameModalOpen] = useState(false);
   const [selectedShapeInfo, setSelectedShapeInfo] = useState(null);
   const [selectedShapes, setSelectedShapes] = useState([]); // 선택된 도형들 저장
+  const [fallingEmojis, setFallingEmojis] = useState([]); // 떨어지는 이모티콘들
 
   // 도형 ID에서 모델 경로 반환하는 함수
   const getShapeModelPathById = (shapeId) => {
@@ -528,6 +551,50 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
     };
     return shapeModels[shapeId] || '/box.gltf';
   };
+
+  // 페이지 로드 시 떨어지는 이모티콘들 생성
+  useEffect(() => {
+    const emojis = [];
+    const emojiCharToId = {'😀': 'joy', '😮': 'surprise', '😐': 'neutral', '😖': 'sadness', '😠': 'anger'};
+    
+    // 긍정 이모티콘들 추가 (왼쪽에서 떨어짐)
+    positiveEmojis.forEach((emojiChar, index) => {
+      const emojiId = emojiCharToId[emojiChar];
+      if (emojiId) {
+        for (let i = 0; i < leftSliderValue; i++) {
+          emojis.push({
+            id: `positive-${index}-${i}-${Date.now()}`,
+            emojiId,
+            position: [
+              -8 + Math.random() * 6, // 왼쪽 영역을 훨씬 더 넓게 (-8에서 -2)
+              8 + Math.random() * 6, // 더 높은 위치에서 시작 (8에서 14)
+              -6 + Math.random() * 4 // 뒤쪽에서 떨어지게 (-6에서 -2)
+            ]
+          });
+        }
+      }
+    });
+
+    // 부정 이모티콘들 추가 (오른쪽에서 떨어짐)
+    negativeEmojis.forEach((emojiChar, index) => {
+      const emojiId = emojiCharToId[emojiChar];
+      if (emojiId) {
+        for (let i = 0; i < rightSliderValue; i++) {
+          emojis.push({
+            id: `negative-${index}-${i}-${Date.now()}`,
+            emojiId,
+            position: [
+              2 + Math.random() * 6, // 오른쪽 영역을 훨씬 더 넓게 (2에서 8)
+              8 + Math.random() * 6, // 더 높은 위치에서 시작 (8에서 14)
+              -6 + Math.random() * 4 // 뒤쪽에서 떨어지게 (-6에서 -2)
+            ]
+          });
+        }
+      }
+    });
+
+    setFallingEmojis(emojis);
+  }, [positiveEmojis, negativeEmojis, leftSliderValue, rightSliderValue]);
 
   // 도형 정보 정의
   const shapeInfoMap = {
@@ -906,6 +973,16 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
                 shapeInfo={shape}
                 position={shape.position}
                 scale={[0.8, 0.8, 0.8]}
+              />
+            ))}
+            
+            {/* 떨어지는 3D 이모티콘들 */}
+            {fallingEmojis.map((emoji) => (
+              <FallingEmoji
+                key={emoji.id}
+                emojiId={emoji.emojiId}
+                position={emoji.position}
+                scale={[4, 4, 4]}
               />
             ))}
             
