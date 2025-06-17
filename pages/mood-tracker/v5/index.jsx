@@ -403,16 +403,14 @@ const ShapeGameModal = ({ isOpen, shapeInfo, onClose, onSelect }) => {
         position: 'relative',
         animation: 'slideIn 0.4s ease-out'
       }}>
-        {/* 도형 이름 */}
-        <h2 style={{
-          fontSize: '32px',
-          fontWeight: 'bold',
-          color: '#333',
+        {/* 도형 이모티콘 */}
+        <div style={{
+          fontSize: '80px',
           margin: '0',
           textAlign: 'center'
         }}>
-          {shapeInfo.name}
-        </h2>
+          {shapeInfo.emoji || shapeInfo.name}
+        </div>
 
         {/* 도형 설명 */}
         <p style={{
@@ -514,7 +512,7 @@ const ShapeGameModal = ({ isOpen, shapeInfo, onClose, onSelect }) => {
 };
 
 // --- 생물 만들기 페이지 컴포넌트 ---
-const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => {
+const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, positiveEmojis, negativeEmojis, leftSliderValue, rightSliderValue }) => {
   const [isShapeGameModalOpen, setIsShapeGameModalOpen] = useState(false);
   const [selectedShapeInfo, setSelectedShapeInfo] = useState(null);
   const [selectedShapes, setSelectedShapes] = useState([]); // 선택된 도형들 저장
@@ -523,23 +521,28 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
   const shapeInfoMap = {
     'box': {
       name: '파란 네모',
-      description: '나는 뾰족하지만 넓은 마음을 가지고 있어!'
+      description: '나는 뾰족하지만 넓은 마음을 가지고 있어!',
+      emoji: '😀'
     },
     'cylinder': {
       name: '빨간 길쭉이',
-      description: '나는 길쭉길쭉하고 동글동글하지만 강해!'
+      description: '나는 길쭉길쭉하고 동글동글하지만 강해!',
+      emoji: '😮'
     },
     'circle': {
       name: '분홍 둥글이',
-      description: '나는 둥그렇게 돌아가지! 때에 따라 다양한 모습으로 변할 수 있어'
+      description: '나는 둥그렇게 돌아가지! 때에 따라 다양한 모습으로 변할 수 있어',
+      emoji: '😐'
     },
     'hexagon': {
       name: '노란 뾰족이',
-      description: '나는 뾰족뾰족! 날카롭지만 다양한 모습을 가지고 있어'
+      description: '나는 뾰족뾰족! 날카롭지만 다양한 모습을 가지고 있어',
+      emoji: '😖'
     },
     'star': {
       name: '초록 별',
-      description: '나는 반짝반짝 빛나는 별이야!'
+      description: '나는 반짝반짝 빛나는 별이야!',
+      emoji: '😠'
     }
   };
 
@@ -550,6 +553,39 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
     'neutral': 'circle',    // 무표정 -> 분홍 둥글이
     'sadness': 'hexagon',   // 슬픔 -> 노란 뾰족이
     'anger': 'star'         // 화남 -> 초록 별
+  };
+
+  // 슬라이더 값에 따라 우세한 이모티콘 결정
+  const getDominantEmojis = () => {
+    if (leftSliderValue > rightSliderValue) {
+      return positiveEmojis;
+    } else if (rightSliderValue > leftSliderValue) {
+      return negativeEmojis;
+    } else {
+      // 같을 경우 모든 이모티콘 포함
+      return [...positiveEmojis, ...negativeEmojis];
+    }
+  };
+
+  // 우세한 이모티콘에서 첫 번째 이모티콘의 도형 ID 가져오기
+  const getDominantShapeId = () => {
+    const dominantEmojis = getDominantEmojis();
+    if (dominantEmojis.length > 0) {
+      // 첫 번째 이모티콘에서 이모티콘 ID 추출 (예: '😀' -> 'joy')
+      const emojiChar = dominantEmojis[0];
+      for (const [emojiId, emojiValue] of Object.entries({'joy': '😀', 'surprise': '😮', 'neutral': '😐', 'sadness': '😖', 'anger': '😠'})) {
+        if (emojiValue === emojiChar) {
+          return emojiToShapeMap[emojiId];
+        }
+      }
+    }
+    return 'box'; // 기본값
+  };
+
+  // 선택되지 않은 도형들 가져오기
+  const getUnselectedShapes = () => {
+    const dominantShapeId = getDominantShapeId();
+    return Object.keys(shapeInfoMap).filter(shapeId => shapeId !== dominantShapeId);
   };
 
   const handleShapeClick = (shapeId) => {
@@ -595,6 +631,9 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
     }]);
   };
 
+  const dominantShapeId = getDominantShapeId();
+  const unselectedShapes = getUnselectedShapes();
+
   return (
     <div style={{
       width: '100vw',
@@ -613,6 +652,96 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
           to { opacity: 1; }
         }
       `}</style>
+
+      {/* 왼쪽 칼럼 */}
+      <div style={{
+        position: 'absolute',
+        left: '20px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        width: '250px',
+        height: '80%',
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: '20px',
+        padding: '20px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 10
+      }}>
+        {/* 상단: 감정 생물 만들기 */}
+        <div style={{
+          textAlign: 'center',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          color: '#333',
+          marginBottom: '20px',
+          padding: '10px',
+          background: '#E8F5E8',
+          borderRadius: '10px'
+        }}>
+          감정 생물 만들기
+        </div>
+
+        {/* 중간: 도형의 성격 */}
+        <div style={{
+          textAlign: 'center',
+          fontSize: '16px',
+          fontWeight: '600',
+          color: '#666',
+          marginBottom: '15px',
+          padding: '8px',
+          background: '#F0F8FF',
+          borderRadius: '8px'
+        }}>
+          도형의 성격
+        </div>
+
+        {/* 선택되지 않은 도형들 세로 나열 */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          overflowY: 'auto'
+        }}>
+          {unselectedShapes.map((shapeId) => {
+            const shapeInfo = shapeInfoMap[shapeId];
+            return (
+              <div
+                key={shapeId}
+                onClick={() => handleShapeClick(shapeId)}
+                style={{
+                  padding: '12px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '10px',
+                  border: '2px solid #ddd',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'rgba(135, 206, 235, 0.3)';
+                  e.target.style.borderColor = '#87CEEB';
+                  e.target.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'rgba(255, 255, 255, 0.8)';
+                  e.target.style.borderColor = '#ddd';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                <div style={{ fontSize: '24px' }}>{shapeInfo.emoji}</div>
+                <div style={{ fontSize: '12px', color: '#666' }}>{shapeInfo.name}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
       
       {/* 뒤로 가기 버튼 */}
       <button
@@ -754,60 +883,58 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords }) => 
               />
             ))}
             
-            {/* 하단의 3D 이모티콘들 - 메인 페이지와 동일한 위치와 크기 */}
-            <EmojiSelector3D onEmojiClick={handleEmojiClick} />
+            {/* 하단의 우세한 이모티콘만 표시 */}
+            {(() => {
+              const dominantEmojis = getDominantEmojis();
+              const emojiIdToChar = {'joy': '😀', 'surprise': '😮', 'neutral': '😐', 'sadness': '😖', 'anger': '😠'};
+              
+              return dominantEmojis.map((emojiChar, index) => {
+                for (const [emojiId, emojiValue] of Object.entries(emojiIdToChar)) {
+                  if (emojiValue === emojiChar) {
+                    return (
+                      <group key={emojiId}>
+                        {/* 해당 이모티콘의 3D 모델 표시 */}
+                        <Emoji3D
+                          emojiId={emojiId}
+                          modelPath={`/models/emotion${Object.keys(emojiIdToChar).indexOf(emojiId) + 1}.gltf`}
+                          initialPosition={[index * 1.2 - (dominantEmojis.length - 1) * 0.6, 0.3, 4.7]}
+                          scale={0.93}
+                          onClick={handleEmojiClick}
+                        />
+                      </group>
+                    );
+                  }
+                }
+                return null;
+              });
+            })()}
             
-            {/* 5개의 3D 모델들을 중앙 주변에 배치 - 간격을 더 넓혀줌 */}
-            <FloatingModel 
-              url="/box.gltf" 
-              position={[-3.6, 0, 0]} 
-              rotationSpeed={0.008}
-              floatSpeed={0.015}
-              floatAmplitude={0.3}
-              scale={[0.8, 0.8, 0.8]}
-              onClick={handleShapeClick}
-              shapeId="box"
-            />
-            <FloatingModel 
-              url="/clinder.gltf" 
-              position={[-1.8, 0, 0]} 
-              rotationSpeed={0.012}
-              floatSpeed={0.02}
-              floatAmplitude={0.4}
-              scale={[0.8, 0.8, 0.8]}
-              onClick={handleShapeClick}
-              shapeId="cylinder"
-            />
-            <FloatingModel 
-              url="/circle.gltf" 
-              position={[0, 0, 0]} 
-              rotationSpeed={0.009}
-              floatSpeed={0.016}
-              floatAmplitude={0.38}
-              scale={[0.8, 0.8, 0.8]}
-              onClick={handleShapeClick}
-              shapeId="circle"
-            />
-            <FloatingModel 
-              url="/hexagon.gltf" 
-              position={[1.8, 0, 0]} 
-              rotationSpeed={0.01}
-              floatSpeed={0.018}
-              floatAmplitude={0.35}
-              scale={[0.8, 0.8, 0.8]}
-              onClick={handleShapeClick}
-              shapeId="hexagon"
-            />
-            <FloatingModel 
-              url="/star.gltf" 
-              position={[3.6, 0, 0]} 
-              rotationSpeed={0.015}
-              floatSpeed={0.025}
-              floatAmplitude={0.45}
-              scale={[0.8, 0.8, 0.8]}
-              onClick={handleShapeClick}
-              shapeId="star"
-            />
+            {/* 우세한 도형만 중앙에 표시 */}
+            {(() => {
+              const getShapeModelPath = (shapeId) => {
+                const shapeModels = {
+                  'box': '/box.gltf',
+                  'cylinder': '/clinder.gltf',
+                  'circle': '/circle.gltf',
+                  'hexagon': '/hexagon.gltf',
+                  'star': '/star.gltf'
+                };
+                return shapeModels[shapeId];
+              };
+
+              return (
+                <FloatingModel 
+                  url={getShapeModelPath(dominantShapeId)} 
+                  position={[0, 0, 0]} 
+                  rotationSpeed={0.009}
+                  floatSpeed={0.016}
+                  floatAmplitude={0.38}
+                  scale={[1.2, 1.2, 1.2]}
+                  onClick={handleShapeClick}
+                  shapeId={dominantShapeId}
+                />
+              );
+            })()}
           </Physics>
         </Suspense>
       </Canvas>
@@ -1093,6 +1220,10 @@ export default function MoodTrackerPage() {
         keyword={userInputText || '감정'}
         dominantEmojis={dominantEmojis}
         dominantKeywords={dominantKeywords}
+        positiveEmojis={positiveEmojis}
+        negativeEmojis={negativeEmojis}
+        leftSliderValue={leftSliderValue}
+        rightSliderValue={rightSliderValue}
       />
         
         {/* 배경음악 - 세번째 화면에서도 계속 재생 */}
