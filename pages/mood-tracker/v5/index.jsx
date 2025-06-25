@@ -1,6 +1,6 @@
 import React, { useState, Suspense, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, OrthographicCamera, useGLTF } from '@react-three/drei';
+import { OrthographicCamera, useGLTF } from '@react-three/drei';
 import { Physics, RigidBody } from '@react-three/rapier';
 import { useControls } from 'leva';
 import FullScreenContainer from '../../../components/mood-tracker/v4/FullScreenContainer';
@@ -776,7 +776,7 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
           도형의 성격
         </div>
 
-                {/* 선택되지 않은 도형들 세로 나열 */}
+        {/* 선택되지 않은 도형들 세로 나열 */}
         <div style={{
           flex: 1,
           display: 'flex',
@@ -947,20 +947,19 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
       {/* 3D 씬 */}
       <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}>
         <Suspense fallback={null}>
-          <ambientLight intensity={0.25} color="#FFFFFF" />
+          <ambientLight intensity={0.6} color="#FFFFFF" />
           <directionalLight 
             position={[8, 10, 5]} 
-            intensity={0.2} 
+            intensity={0.5} 
             castShadow
             shadow-mapSize-width={1024}
             shadow-mapSize-height={1024}
           />
           <directionalLight 
             position={[-8, 5, -8]} 
-            intensity={0.1}
+            intensity={0.3}
             color="#E3F2FD"
           />
-          <Environment preset="sunset" intensity={0.8} blur={0.5} />
           
           <Physics>
             {/* 가상 바닥 */}
@@ -1478,20 +1477,19 @@ export default function MoodTrackerPage() {
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
         <Canvas camera={{ position: [0, 3.5, 7], fov: 50 }}> 
           <Suspense fallback={null}>
-            <ambientLight intensity={0.25} color="#FFFFFF" />
+            <ambientLight intensity={0.6} color="#FFFFFF" />
             <directionalLight 
               position={[8, 10, 5]} 
-              intensity={0.2} 
+              intensity={0.5} 
               castShadow
               shadow-mapSize-width={1024}
               shadow-mapSize-height={1024}
             />
             <directionalLight 
               position={[-8, 5, -8]} 
-              intensity={0.1}
+              intensity={0.3}
               color="#E3F2FD"
             />
-            <Environment preset="sunset" intensity={0.8} blur={0.5} />
                         <Physics>
             <PhysicsGround />
             <ScaledScene
