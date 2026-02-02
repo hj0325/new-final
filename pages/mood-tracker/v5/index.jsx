@@ -63,28 +63,28 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      background: 'linear-gradient(135deg, #B02B3A 0%, #8B1E2B 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 2000,
-      animation: 'fadeIn 0.3s ease-in-out',
-      overflow: 'hidden'
-    }}>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 16px',
+        zIndex: 2000,
+        // 다른 모달들과 동일하게: 바깥 클릭은 기능에 영향 없도록 통과
+        pointerEvents: 'none',
+        overflow: 'hidden',
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
       {/* 3D 떨어지는 이모티콘 배경 */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: 1
+        inset: 0,
+        zIndex: 1,
+        pointerEvents: 'none',
       }}>
         <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
           <Suspense fallback={null}>
@@ -96,46 +96,86 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
         </Canvas>
       </div>
 
-      <div style={{
-        width: '80vw',
-        height: '70vh',
-        maxWidth: '800px',
-        maxHeight: '600px',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        border: '3px solid #B02B3A',
-        borderRadius: '20px',
-        boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
-        padding: '40px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '30px',
-        position: 'relative',
-        backdropFilter: 'blur(10px)',
-        animation: 'slideIn 0.4s ease-out',
-        zIndex: 10
-      }}>
+      {/* 배경 블러 + 틴트 */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 2,
+          pointerEvents: 'none',
+          background:
+            'radial-gradient(120% 120% at 50% 45%, rgba(255,255,255,0.08) 0%, rgba(176,43,58,0.14) 40%, rgba(139,30,43,0.22) 100%)',
+          backdropFilter: 'blur(6px)',
+        }}
+      />
+
+      <div
+        className="momoModal"
+        style={{
+          width: 'min(560px, 90vw)',
+          maxHeight: 'min(560px, 76vh)',
+          overflowY: 'auto',
+          background: 'rgba(255, 255, 255, 0.92)',
+          border: '1px solid rgba(255, 255, 255, 0.95)',
+          borderRadius: '28px',
+          // 다른 모달들과 비슷한 "글로우+소프트 섀도우"
+          boxShadow: '0 22px 70px rgba(255, 255, 255, 0.32), 0 18px 50px rgba(0,0,0,0.22)',
+          padding: '30px 28px 26px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '14px',
+          position: 'relative',
+          zIndex: 10,
+          pointerEvents: 'auto',
+          backdropFilter: 'blur(10px)',
+          fontFamily:
+            "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
+        }}
+      >
+        {/* 상단 핸들 */}
+        <div
+          style={{
+            width: '56px',
+            height: '6px',
+            borderRadius: '999px',
+            marginTop: '-10px',
+            marginBottom: '4px',
+            background: 'linear-gradient(90deg, rgba(255, 229, 122, 0.95), rgba(255, 200, 61, 0.95))',
+            boxShadow: '0 10px 22px rgba(255, 200, 61, 0.20)',
+          }}
+        />
+
         {/* 닫기 버튼 */}
         <button
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '15px',
-            right: '20px',
-            background: 'none',
-            border: 'none',
-            fontSize: '30px',
+            top: '14px',
+            right: '14px',
+            width: '40px',
+            height: '40px',
+            display: 'grid',
+            placeItems: 'center',
+            background: 'rgba(255, 255, 255, 0.65)',
+            border: '1px solid rgba(17, 24, 39, 0.10)',
+            borderRadius: '14px',
+            fontSize: '20px',
             cursor: 'pointer',
             color: '#B02B3A',
-            fontWeight: 'bold',
-            transition: 'transform 0.2s ease'
+            fontWeight: 700,
+            boxShadow: '0 10px 22px rgba(17, 24, 39, 0.10)',
+            transition: 'transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease',
           }}
           onMouseOver={(e) => {
-            e.target.style.transform = 'scale(1.1)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.82)';
+            e.currentTarget.style.boxShadow = '0 14px 28px rgba(17, 24, 39, 0.14)';
           }}
           onMouseOut={(e) => {
-            e.target.style.transform = 'scale(1)';
+            e.currentTarget.style.transform = 'translateY(0px)';
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.65)';
+            e.currentTarget.style.boxShadow = '0 10px 22px rgba(17, 24, 39, 0.10)';
           }}
         >
           ×
@@ -143,10 +183,11 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
 
         {/* 우세한 이모티콘들 표시 */}
         <div style={{
-          fontSize: dominantEmojis.length > 1 ? '80px' : '120px',
-          marginBottom: '10px',
-          textShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          animation: 'bounce 2s ease-in-out infinite',
+          fontSize: dominantEmojis.length > 1 ? '62px' : '84px',
+          marginTop: '6px',
+          marginBottom: '4px',
+          textShadow: '0 8px 18px rgba(17,24,39,0.12)',
+          animation: 'momoFloat 2.4s ease-in-out infinite',
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',
@@ -155,7 +196,7 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
         }}>
           {dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
             <span key={index} style={{
-              fontSize: dominantEmojis.length > 3 ? '60px' : dominantEmojis.length > 1 ? '80px' : '120px'
+              fontSize: dominantEmojis.length > 3 ? '46px' : dominantEmojis.length > 1 ? '62px' : '84px'
             }}>
               {emoji}
             </span>
@@ -163,43 +204,56 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
         </div>
 
         {/* 메인 문구 */}
-        <h1 style={{
+        <h1
+          style={{
           textAlign: 'center',
-          fontSize: '28px',
-          fontWeight: 'bold',
+          fontSize: '26px',
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
           color: '#B02B3A',
           margin: '0',
-          lineHeight: '1.4',
-          animation: 'fadeInUp 0.6s ease-out'
-        }}>
+          lineHeight: 1.25,
+          animation: 'fadeInUp 0.24s ease-out'
+        }}
+        >
           오늘의 감정 생물을 만들어 보아요!
         </h1>
 
         {/* 키워드 표시 */}
-        <div style={{
-          padding: '15px 30px',
-          background: '#D2F2E9',
-          borderRadius: '25px',
-          fontSize: '18px',
-          fontWeight: '600',
-          color: '#333',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          animation: 'fadeInUp 0.8s ease-out',
-          textAlign: 'center',
-          minHeight: '50px',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div
+          style={{
+            width: 'min(460px, 100%)',
+            padding: 0,
+            background: 'transparent',
+            border: 'none',
+            borderRadius: 0,
+            boxShadow: 'none',
+            animation: 'fadeInUp 0.32s ease-out',
+            textAlign: 'center',
+            minHeight: 0,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           {dominantKeywords && dominantKeywords.length > 0 ? (
             dominantKeywords.map((keyword, index) => (
-              <span key={index} style={{
-                padding: '5px 12px',
-                borderRadius: '15px',
-                fontSize: '20px'
-              }}>
+              <span
+                key={index}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: '999px',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#111827',
+                  background: 'rgba(255, 255, 255, 0.82)',
+                  border: '1px solid rgba(17, 24, 39, 0.08)',
+                  boxShadow: '0 10px 22px rgba(255, 255, 255, 0.18), 0 6px 14px rgba(0,0,0,0.06)',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {keyword}
               </span>
             ))
@@ -211,76 +265,75 @@ const GameCreationModal = ({ isOpen, keyword, dominantEmojis = [], dominantKeywo
         </div>
 
         {/* 게임 시작 버튼 */}
-        <button 
+        <div style={{ flex: 1, minHeight: '8px' }} />
+        <button
+          className="momoBtn"
           style={{
-            padding: '15px 40px',
-            fontSize: '25px',
-            fontWeight: 'medium',
-            background: '#B02B3A',
-            color: 'white',
-            border: 'none',
-            borderRadius: '15px',
+            width: 'min(260px, 100%)',
+            padding: '16px 22px',
+            fontSize: '20px',
+            fontWeight: 600,
+            background: 'linear-gradient(180deg, #FFE57A 0%, #FFC83D 100%)',
+            color: '#111827',
+            border: '1px solid rgba(17, 24, 39, 0.12)',
+            borderRadius: '18px',
             cursor: 'pointer',
-            boxShadow: '0 6px 12px rgba(176, 43, 58, 0.3)',
-            transition: 'all 0.3s ease',
-            marginTop: '20px',
-            animation: 'fadeInUp 1s ease-out'
+            boxShadow: '0 12px 26px rgba(17, 24, 39, 0.14)',
+            transition: 'transform 0.12s ease, box-shadow 0.12s ease',
+            marginTop: '10px',
+            animation: 'fadeInUp 0.40s ease-out'
           }}
           onMouseOver={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 8px 16px rgba(176, 43, 58, 0.4)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 16px 34px rgba(17, 24, 39, 0.18)';
           }}
           onMouseOut={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 6px 12px rgba(176, 43, 58, 0.3)';
+            e.currentTarget.style.transform = 'translateY(0px)';
+            e.currentTarget.style.boxShadow = '0 12px 26px rgba(17, 24, 39, 0.14)';
           }}
           onClick={onStart}
         >
           Start
         </button>
-      </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideIn {
-          from { 
-            opacity: 0;
-            transform: scale(0.8);
+        <style jsx>{`
+          .momoModal {
+            animation: momoPop 180ms ease-out;
           }
-          to { 
-            opacity: 1;
-            transform: scale(1);
+          .momoBtn:active {
+            transform: translateY(0px);
           }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
+          @keyframes momoPop {
+            from {
+              opacity: 0;
+              transform: translateY(6px) scale(0.985);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-        }
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-10px); }
-          60% { transform: translateY(-5px); }
-        }
-        @keyframes fall {
-          0% {
-            transform: translateY(-50px) rotate(0deg);
-            opacity: 1;
+          @keyframes momoFloat {
+            0%,
+            100% {
+              transform: translateY(0px);
+            }
+            50% {
+              transform: translateY(-6px);
+            }
           }
-          100% {
-            transform: translateY(100vh) rotate(360deg);
-            opacity: 0;
-          }
-        }
-      `}</style>
+        `}</style>
+      </div>
     </div>
   );
 };
