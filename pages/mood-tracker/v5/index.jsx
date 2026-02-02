@@ -1529,14 +1529,16 @@ export default function MoodTrackerPage() {
         </button>
       )}
       {showColumns && (
-        <div style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+        <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: '48%', left: 0, transform: 'translateY(-50%)', zIndex: 1, padding: '0 26px', gap: '24px' }}>
           <EmotionColumn 
+            variant="v5"
             emojis={positiveEmojis} 
             keywords={positiveKeywords} 
             sliderValue={leftSliderValue}
             onSliderChange={setLeftSliderValue}
           />
           <EmotionColumn 
+            variant="v5"
             emojis={negativeEmojis} 
             keywords={negativeKeywords} 
             sliderValue={rightSliderValue}
