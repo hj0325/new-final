@@ -1085,6 +1085,9 @@ export default function MoodTrackerPage() {
   const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
   const [showColumns, setShowColumns] = useState(false); // 양쪽 칼럼 표시 상태
   const audioRef = useRef(null); // 배경음악을 위한 ref
+  const leftColumnRef = useRef(null);
+  const rightColumnRef = useRef(null);
+  const [startButtonPos, setStartButtonPos] = useState(null); // { x, y } (viewport px)
   
   // Leva를 사용한 바구니 이모티콘 조정 컨트롤
   const { 
@@ -1178,6 +1181,55 @@ export default function MoodTrackerPage() {
       label: 'Z축 위치 오프셋 (앞뒤 조절)'
     }
   });
+
+  // 만들기 시작 버튼을 "더 높은 슬라이더 값 쪽 카드 밑"으로 자연스럽게 배치
+  useEffect(() => {
+    if (!showColumns || (positiveEmojis.length === 0 && negativeEmojis.length === 0)) {
+      setStartButtonPos(null);
+      return;
+    }
+
+    const pickDominantEl = () => {
+      // 한쪽만 존재하면 그쪽
+      if (positiveEmojis.length === 0 && negativeEmojis.length > 0) return rightColumnRef.current;
+      if (negativeEmojis.length === 0 && positiveEmojis.length > 0) return leftColumnRef.current;
+      // 둘 다 있으면 슬라이더 값 큰 쪽
+      if (rightSliderValue > leftSliderValue) return rightColumnRef.current;
+      return leftColumnRef.current; // 같으면 왼쪽
+    };
+
+    const update = () => {
+      const el = pickDominantEl();
+      if (!el || !el.getBoundingClientRect) {
+        setStartButtonPos(null);
+        return;
+      }
+
+      const rect = el.getBoundingClientRect();
+      const targetX = rect.left + rect.width / 2;
+      const targetY = rect.bottom + 14;
+
+      const x = Math.max(24, Math.min(window.innerWidth - 24, targetX));
+      const y = Math.max(24, Math.min(window.innerHeight - 24, targetY));
+
+      setStartButtonPos({ x, y });
+    };
+
+    update();
+    window.addEventListener('resize', update);
+    // FullScreenContainer 내 스크롤/레이아웃 변화에도 대응
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [
+    showColumns,
+    leftSliderValue,
+    rightSliderValue,
+    positiveEmojis.length,
+    negativeEmojis.length,
+  ]);
 
   // 슬라이더 값에 따른 저울 기울기 계산
   const calculateTiltAngle = () => {
@@ -1500,29 +1552,37 @@ export default function MoodTrackerPage() {
         <button
           onClick={handleStartGame}
           style={{
-            position: 'absolute',
-            bottom: '260px', // 하단 이모티콘 위쪽으로 이동
-            left: '50%',
+            position: startButtonPos ? 'fixed' : 'absolute',
+            ...(startButtonPos
+              ? { left: `${startButtonPos.x}px`, top: `${startButtonPos.y}px` }
+              : {
+                  bottom: '260px', // 기존 위치(폴백)
+                  left: '50%',
+                }),
             transform: 'translateX(-50%)',
-            padding: '15px 30px',
-            fontSize: '22px',
-            fontWeight: 'bold',
-            background: 'white',
-            color: 'black',
-            border: 'none',
-            borderRadius: '18px',
-            boxShadow: '0 4px 12px rgba(176, 43, 58, 0.3)',
+            padding: '14px 22px',
+            fontSize: '18px',
+            fontWeight: 700,
+            background: 'rgba(255, 255, 255, 0.55)',
+            color: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.65)',
+            borderRadius: '999px',
+            boxShadow: '0 14px 32px rgba(17, 24, 39, 0.18)',
+            backdropFilter: 'blur(12px) saturate(1.25)',
+            WebkitBackdropFilter: 'blur(12px) saturate(1.25)',
             cursor: 'pointer',
-            zIndex: 100,
-            transition: 'all 0.3s ease',
+            zIndex: 150,
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
           }}
           onMouseEnter={(e) => {
-            e.target.style.transform = 'translateX(-50%) scale(1.05)';
-            e.target.style.boxShadow = '0 6px 16px rgba(176, 43, 58, 0.4)';
+            e.target.style.transform = 'translateX(-50%) translateY(-2px) scale(1.04)';
+            e.target.style.background = 'rgba(255, 255, 255, 0.68)';
+            e.target.style.boxShadow = '0 18px 38px rgba(17, 24, 39, 0.22)';
           }}
           onMouseLeave={(e) => {
-            e.target.style.transform = 'translateX(-50%) scale(1)';
-            e.target.style.boxShadow = '0 4px 12px rgba(176, 43, 58, 0.3)';
+            e.target.style.transform = 'translateX(-50%)';
+            e.target.style.background = 'rgba(255, 255, 255, 0.55)';
+            e.target.style.boxShadow = '0 14px 32px rgba(17, 24, 39, 0.18)';
           }}
         >
           만들기 시작
@@ -1530,20 +1590,24 @@ export default function MoodTrackerPage() {
       )}
       {showColumns && (
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', position: 'absolute', top: '48%', left: 0, transform: 'translateY(-50%)', zIndex: 1, padding: '0 26px', gap: '24px' }}>
-          <EmotionColumn 
-            variant="v5"
-            emojis={positiveEmojis} 
-            keywords={positiveKeywords} 
-            sliderValue={leftSliderValue}
-            onSliderChange={setLeftSliderValue}
-          />
-          <EmotionColumn 
-            variant="v5"
-            emojis={negativeEmojis} 
-            keywords={negativeKeywords} 
-            sliderValue={rightSliderValue}
-            onSliderChange={setRightSliderValue}
-          />
+          <div ref={leftColumnRef} style={{ display: 'flex' }}>
+            <EmotionColumn 
+              variant="v5"
+              emojis={positiveEmojis} 
+              keywords={positiveKeywords} 
+              sliderValue={leftSliderValue}
+              onSliderChange={setLeftSliderValue}
+            />
+          </div>
+          <div ref={rightColumnRef} style={{ display: 'flex' }}>
+            <EmotionColumn 
+              variant="v5"
+              emojis={negativeEmojis} 
+              keywords={negativeKeywords} 
+              sliderValue={rightSliderValue}
+              onSliderChange={setRightSliderValue}
+            />
+          </div>
         </div>
       )}
       <div style={{ width: '90%', height: '90%', maxWidth: '1200px', maxHeight: '900px', position: 'relative', zIndex: 2 }}>
