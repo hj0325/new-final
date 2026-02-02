@@ -11,7 +11,7 @@ const EMOTION_MODEL_PATHS = [
   { path: '/models/emotion5.gltf', id: 'anger' },    // 😠
 ];
 
-function EmojiSelector3D({ onEmojiClick }) {
+function EmojiSelector3D({ onEmojiClick, hiddenEmojiId = null }) {
   const { 
     emojiScale, 
     emojiYPosition, // 이 변수가 전체 이모지 그룹의 Y축 (수직) 위치를 담당합니다.
@@ -42,6 +42,7 @@ function EmojiSelector3D({ onEmojiClick }) {
       ]}
     >
       {EMOTION_MODEL_PATHS.map((emoji, index) => (
+        emoji.id === hiddenEmojiId ? null : (
         <Emoji3D
           key={emoji.id}
           emojiId={emoji.id}
@@ -54,6 +55,7 @@ function EmojiSelector3D({ onEmojiClick }) {
           scale={emojiScale}
           onClick={onEmojiClick}
         />
+        )
       ))}
     </group>
   );

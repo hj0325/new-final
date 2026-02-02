@@ -2,7 +2,7 @@ import React, { useState, Suspense, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrthographicCamera, useGLTF } from '@react-three/drei';
 import { Physics, RigidBody } from '@react-three/rapier';
-import { useControls } from 'leva';
+import { Leva, useControls } from 'leva';
 import FullScreenContainer from '../../../components/mood-tracker/v4/FullScreenContainer';
 import GameModal from '../../../components/mood-tracker/v4/GameModal';
 import TextInputModal from '../../../components/mood-tracker/v4/TextInputModal';
@@ -22,6 +22,19 @@ const emojiIdToChar = {
   'neutral': '😐',
   'sadness': '😖',
   'anger': '😠',
+};
+
+// 프리뷰 모델 미리 로드
+['/models/emotion1.gltf', '/models/emotion2.gltf', '/models/emotion3.gltf', '/models/emotion4.gltf', '/models/emotion5.gltf']
+  .forEach((p) => useGLTF.preload(p));
+
+// (Rapier 없는) 3D 이모티콘 프리뷰 - 블러 위에 올릴 용도
+const EmojiPreview3D = ({ emojiId, scale = 1, position = [0, 0, 0] }) => {
+  const modelPath = `/models/emotion${{ joy: 1, surprise: 2, neutral: 3, sadness: 4, anger: 5 }[emojiId] || 1}.gltf`;
+  const { scene } = useGLTF(modelPath);
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+
+  return <primitive object={clonedScene} scale={scale} position={position} />;
 };
 
 // --- 데이터 정의: 이모티콘별 키워드 ---
@@ -1057,6 +1070,7 @@ export default function MoodTrackerPage() {
   const [showLanding, setShowLanding] = useState(true);
   const [isGameModalOpen, setIsGameModalOpen] = useState(false);
   const [selectedEmojiForGameModal, setSelectedEmojiForGameModal] = useState(null);
+  const [selectedEmojiIdForGameModal, setSelectedEmojiIdForGameModal] = useState(null);
   const [isTextInputModalOpen, setIsTextInputModalOpen] = useState(false);
   const [userInputText, setUserInputText] = useState('');
   const [positiveEmojis, setPositiveEmojis] = useState([]); // 긍정 이모티콘들
@@ -1188,6 +1202,7 @@ export default function MoodTrackerPage() {
     const emojiChar = emojiIdToChar[emojiId];
     if (emojiChar) {
       setSelectedEmojiForGameModal(emojiChar);
+      setSelectedEmojiIdForGameModal(emojiId);
       setIsGameModalOpen(true);
     }
   };
@@ -1195,6 +1210,7 @@ export default function MoodTrackerPage() {
   const closeGameModal = () => {
     setIsGameModalOpen(false);
     setSelectedEmojiForGameModal(null);
+    setSelectedEmojiIdForGameModal(null);
   };
 
   const handleEmojiSelection = (emoji, keywords, type) => {
@@ -1446,7 +1462,38 @@ export default function MoodTrackerPage() {
 
   return (
     <>
+    {/* Leva 패널 렌더 (기존 useControls들이 실제로 보이도록) */}
+    <Leva collapsed={false} />
     <FullScreenContainer>
+      {/* GameModal 블러 위에: 클릭된 하단 이모티콘만 선명하게 오버레이 */}
+      {isGameModalOpen && selectedEmojiIdForGameModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 8500, pointerEvents: 'none' }}>
+          <Canvas
+            gl={{ alpha: true }}
+            camera={{ position: [0, 3.5, 7], fov: 50 }}
+            style={{ width: '100%', height: '100%', background: 'transparent' }}
+          >
+            <Suspense fallback={null}>
+              <ambientLight intensity={0.6} color="#FFFFFF" />
+              <directionalLight position={[8, 10, 5]} intensity={0.5} />
+              <directionalLight position={[-8, 5, -8]} intensity={0.3} color="#E3F2FD" />
+
+              {/* EmojiSelector3D의 기본 배치/회전에 맞춘 클릭 이모티콘 위치 */}
+              <group rotation={[(-23 * Math.PI) / 180, 0, 0]}>
+                <EmojiPreview3D
+                  emojiId={selectedEmojiIdForGameModal}
+                  scale={0.93}
+                  position={[
+                    (['joy', 'surprise', 'neutral', 'sadness', 'anger'].indexOf(selectedEmojiIdForGameModal) - 2) * 0.10,
+                    0.3,
+                    4.7
+                  ]}
+                />
+              </group>
+            </Suspense>
+          </Canvas>
+        </div>
+      )}
       
       {/* 만들기 시작 버튼 - 이모티콘이 있고 슬라이더가 조작되었을 때만 표시 */}
       {showColumns && (positiveEmojis.length > 0 || negativeEmojis.length > 0) && (
@@ -1523,7 +1570,8 @@ export default function MoodTrackerPage() {
               verticalMovementFactor={0.03}
             />
               <EmojiSelector3D 
-                onEmojiClick={handleEmoji3DClick} 
+                onEmojiClick={handleEmoji3DClick}
+                hiddenEmojiId={isGameModalOpen ? selectedEmojiIdForGameModal : null}
                 />
               <BasketEmojiManager
                 leftCount={positiveEmojis.length > 0 ? leftSliderValue : 0}
