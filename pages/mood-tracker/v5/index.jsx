@@ -600,11 +600,127 @@ const ShapeGameModal = ({ isOpen, shapeInfo, onClose, onSelect }) => {
 };
 
 // --- 생물 만들기 페이지 컴포넌트 ---
-const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, positiveEmojis, negativeEmojis, leftSliderValue, rightSliderValue }) => {
+const CreationPage = ({
+  onBack,
+  keyword,
+  dominantEmojis,
+  dominantKeywords,
+  positiveEmojis,
+  negativeEmojis,
+  positiveKeywords = [],
+  negativeKeywords = [],
+  leftSliderValue,
+  rightSliderValue
+}) => {
   const [isShapeGameModalOpen, setIsShapeGameModalOpen] = useState(false);
   const [selectedShapeInfo, setSelectedShapeInfo] = useState(null);
   const [selectedShapes, setSelectedShapes] = useState([]); // 선택된 도형들 저장
   const [fallingEmojis, setFallingEmojis] = useState([]); // 떨어지는 이모티콘들
+  const [topToastText, setTopToastText] = useState('');
+  const [basePersonalityText, setBasePersonalityText] = useState('');
+
+  const fallbackTopToastText = useMemo(() => {
+    // API 응답이 오기 전/실패 시에도 어색하지 않도록, 문장은 무난하게 유지
+    // (키워드는 위 칩 UI에서 이미 보여주고 있으니, 문장에 억지로 조사/활용을 붙이지 않음)
+    return '좋아, 오늘의 마음으로 감정생물을 함께 만들어보자.';
+  }, [positiveKeywords, negativeKeywords, dominantKeywords]);
+
+  // 상단 문장: 화면 진입 시 API로 자연스럽게 생성 (실패 시 fallback)
+  useEffect(() => {
+    let cancelled = false;
+
+    // 먼저 fallback을 즉시 보여주고, API 결과로 교체
+    setTopToastText(fallbackTopToastText);
+
+    const run = async () => {
+      try {
+        const res = await fetch('/api/mood-tracker/compose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'base',
+            keyword,
+            dominantEmojis,
+            dominantKeywords,
+            positiveEmojis,
+            negativeEmojis,
+            positiveKeywords,
+            negativeKeywords,
+            leftSliderValue,
+            rightSliderValue,
+          }),
+        });
+        const data = await res.json();
+        const text = (data && data.text ? String(data.text) : '').trim();
+        if (!cancelled && text) {
+          setTopToastText(text);
+          setBasePersonalityText(text);
+        }
+      } catch (e) {
+        // fallback 유지
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 도형 성격 확인(모달 열림) 시, 그 도형에 어울리는 "답장"으로 상단 문장 갱신
+  useEffect(() => {
+    if (!isShapeGameModalOpen || !selectedShapeInfo) return;
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const res = await fetch('/api/mood-tracker/compose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'shape',
+            basePersonalityText: (basePersonalityText || topToastText || fallbackTopToastText),
+            shapeInfo: selectedShapeInfo,
+            keyword,
+            dominantEmojis,
+            dominantKeywords,
+            positiveEmojis,
+            negativeEmojis,
+            positiveKeywords,
+            negativeKeywords,
+            leftSliderValue,
+            rightSliderValue,
+          }),
+        });
+        const data = await res.json();
+        const text = (data && data.text ? String(data.text) : '').trim();
+        if (!cancelled && text) setTopToastText(text);
+      } catch (e) {
+        // 기존 문장 유지
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isShapeGameModalOpen,
+    selectedShapeInfo,
+    basePersonalityText,
+    topToastText,
+    fallbackTopToastText,
+    keyword,
+    dominantEmojis,
+    dominantKeywords,
+    positiveEmojis,
+    negativeEmojis,
+    positiveKeywords,
+    negativeKeywords,
+    leftSliderValue,
+    rightSliderValue,
+  ]);
 
   // 도형 ID에서 모델 경로 반환하는 함수
   const getShapeModelPathById = (shapeId) => {
@@ -939,75 +1055,79 @@ const CreationPage = ({ onBack, keyword, dominantEmojis, dominantKeywords, posit
           ⬅
         </button>
       
-      {/* 상단에 우세한 이모티콘과 키워드 표시 */}
-      <div style={{
-        position: 'absolute',
-        top: '30px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: '15px',
-        padding: '20px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        zIndex: 100,
-        textAlign: 'center',
-        minWidth: '300px',
-        maxWidth: '80%'
-      }}>
-        {/* 우세한 이모티콘 표시 */}
-        <div style={{
-          fontSize: '60px',
-          marginBottom: '10px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '10px',
-          flexWrap: 'wrap'
-        }}>
-          {dominantEmojis && dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
-            <span key={index}>{emoji}</span>
-          )) : '😀'}
-        </div>
-        
-        {/* 키워드 표시 */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: '15px'
-        }}>
-          {dominantKeywords && dominantKeywords.length > 0 ? (
-            dominantKeywords.map((keyword, index) => (
-              <span key={index} style={{
-                padding: '5px 12px',
-                background: '#D2F2E9',
-                borderRadius: '15px',
-                fontSize: '16px',
-                fontWeight: '500',
-                color: '#333'
-              }}>
-                {keyword}
-              </span>
-            ))
-          ) : (
-            <span style={{ color: '#666', fontSize: '14px' }}>
-              감정 키워드가 없습니다
-            </span>
-          )}
-        </div>
-        
-        {/* 추가 설명 문구 */}
-        <div style={{
-          fontSize: '18px',
-          color: '#555',
+      {/* 상단 토스트: 이모티콘/키워드 기반 문장 (항상 표시, 문장만 API로 교체) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '30px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '15px',
+          padding: '20px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 100,
           textAlign: 'center',
-          fontWeight: '500',
-          lineHeight: '1.4'
-        }}>
-          도형의 성격을 알아보고 감정 생물 만들기 시작
-        </div>
+          minWidth: '300px',
+          maxWidth: '80%',
+          pointerEvents: 'none',
+        }}
+        aria-live="polite"
+      >
+          {/* 우세한 이모티콘 표시 */}
+          <div style={{
+            fontSize: '60px',
+            marginBottom: '10px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '10px',
+            flexWrap: 'wrap'
+          }}>
+            {dominantEmojis && dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
+              <span key={index}>{emoji}</span>
+            )) : '😀'}
+          </div>
+          
+          {/* 키워드 표시 */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: '12px'
+          }}>
+            {dominantKeywords && dominantKeywords.length > 0 ? (
+              dominantKeywords.map((kw, index) => (
+                <span key={index} style={{
+                  padding: '5px 12px',
+                  background: '#D2F2E9',
+                  borderRadius: '15px',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: '#333'
+                }}>
+                  {kw}
+                </span>
+              ))
+            ) : (
+              <span style={{ color: '#666', fontSize: '14px' }}>
+                감정 키워드가 없습니다
+              </span>
+            )}
+          </div>
+          
+          {/* 한 문장 안내 */}
+          <div style={{
+            fontSize: '18px',
+            color: '#555',
+            textAlign: 'center',
+            fontWeight: '500',
+            lineHeight: '1.4'
+          }}>
+            {topToastText || fallbackTopToastText}
+          </div>
       </div>
       
       {/* 3D 씬 */}
@@ -1468,6 +1588,8 @@ export default function MoodTrackerPage() {
         dominantKeywords={dominantKeywords}
         positiveEmojis={positiveEmojis}
         negativeEmojis={negativeEmojis}
+        positiveKeywords={positiveKeywords}
+        negativeKeywords={negativeKeywords}
         leftSliderValue={leftSliderValue}
         rightSliderValue={rightSliderValue}
       />
