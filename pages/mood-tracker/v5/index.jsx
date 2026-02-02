@@ -1066,6 +1066,7 @@ export default function MoodTrackerPage() {
   const [leftSliderValue, setLeftSliderValue] = useState(0);
   const [rightSliderValue, setRightSliderValue] = useState(0);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [isInstructionsFading, setIsInstructionsFading] = useState(false);
   const [isGameCreationModalOpen, setIsGameCreationModalOpen] = useState(false); // 게임 생성 모달 상태
   const [showCreationPage, setShowCreationPage] = useState(false); // 생물 만들기 페이지 상태
   const [showColumns, setShowColumns] = useState(false); // 양쪽 칼럼 표시 상태
@@ -1305,6 +1306,28 @@ export default function MoodTrackerPage() {
     return () => clearTimeout(timer);
   }, [showLanding, showCreationPage]);
 
+  // 안내 문구: 접속 시 4초 유지 후 자연스럽게 사라짐
+  useEffect(() => {
+    if (showLanding) return;
+    if (!showInstructions) return;
+
+    setIsInstructionsFading(false);
+
+    const fadeTimer = setTimeout(() => {
+      setIsInstructionsFading(true);
+    }, 3600);
+
+    const hideTimer = setTimeout(() => {
+      setShowInstructions(false);
+      setIsInstructionsFading(false);
+    }, 4000);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [showLanding, showInstructions]);
+
   // 우세한 이모티콘들 결정 (슬라이더 값 기반으로 변경)
   const dominantEmojis = leftSliderValue > rightSliderValue ? positiveEmojis : negativeEmojis;
   
@@ -1524,25 +1547,92 @@ export default function MoodTrackerPage() {
         </Canvas>
       </div>
       {showInstructions && (
-        <div style={{
-          position: 'absolute',
-          bottom: '230px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '15px 30px',
-          background: 'rgba(135, 206, 235, 0.6)',
-          color: 'white',
-          borderRadius: '25px',
-          fontSize: '18px',
-          fontWeight: '500',
-          zIndex: 100,
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          fontFamily: 'Arial, sans-serif',
-        }}>
-          이모티콘을 클릭하고 오늘의 감정을 입력하세요
-        </div>
+        <>
+          {/* 배경 블러 오버레이 (기능 영향 없도록 클릭 통과) */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1100,
+              opacity: isInstructionsFading ? 0 : 1,
+              transition: 'opacity 0.4s ease',
+              background: 'rgba(0, 0, 0, 0.10)',
+              backdropFilter: 'blur(4px)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            className="momoHint"
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: `translate(-50%, -50%) ${isInstructionsFading ? 'scale(0.985)' : 'scale(1)'}`,
+              opacity: isInstructionsFading ? 0 : 1,
+              transition: 'opacity 0.4s ease, transform 0.4s ease',
+              padding: '28px 28px 26px',
+              background: 'rgba(255, 255, 255, 0.86)',
+              color: '#111827',
+              borderRadius: '22px',
+              zIndex: 1200,
+              textAlign: 'center',
+              width: 'min(440px, 84vw)',
+              // 블랙 그림자 대신 화이트+옐로 글로우
+              boxShadow:
+                '0 18px 60px rgba(255, 255, 255, 0.35), 0 0 46px rgba(255, 200, 61, 0.40)',
+              backdropFilter: 'blur(8px)',
+              pointerEvents: 'none',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '22px',
+                fontWeight: 500,
+                letterSpacing: '-0.01em',
+                lineHeight: 1.35,
+              }}
+            >
+              <div>이모티콘을 클릭하고</div>
+              <div style={{ height: '10px' }} />
+              <div>오늘의 감정을 입력하세요.</div>
+            </div>
+
+            <style jsx>{`
+              .momoHint {
+                position: relative;
+                animation: momoHintPop 180ms ease-out;
+              }
+
+              /* 테두리로 갈수록 노란색으로 자연스럽게 블러 */
+              .momoHint::before {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 24px;
+                background: radial-gradient(
+                  120% 120% at 50% 50%,
+                  rgba(255, 255, 255, 0) 55%,
+                  rgba(255, 229, 122, 0.55) 78%,
+                  rgba(255, 200, 61, 0.65) 100%
+                );
+                filter: blur(10px);
+                opacity: 0.9;
+                z-index: -1;
+              }
+
+              @keyframes momoHintPop {
+                from {
+                  opacity: 0;
+                  transform: translate(-50%, -50%) scale(0.98);
+                }
+                to {
+                  opacity: 1;
+                  transform: translate(-50%, -50%) scale(1);
+                }
+              }
+            `}</style>
+          </div>
+        </>
       )}
       <GameModal 
         isOpen={isGameModalOpen} 
