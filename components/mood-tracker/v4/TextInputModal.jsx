@@ -23,59 +23,157 @@ const TextInputModal = ({ isOpen, onClose, currentText, onTextChange, onSubmit }
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: '48%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '60vw',
-      height: '60vh',
-      maxWidth: '600px',
-      maxHeight: '400px',
-      backgroundColor: 'rgba(255, 255, 255, 0.90)',
-      border: '2px solid #eee',
-      borderRadius: '10px',
-      boxShadow: '0 8px 13px rgba(0, 0, 0, 0.71)',
-      padding: '30px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '20px',
-      zIndex: 1001,
-    }}>
-      <h2 style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px', fontSize: '30px', color: '#333' }}>
-        오늘 너의 감정은 어땠어?
-      </h2>
-      <input
-        type="date"
-        value={currentText || getDefaultDate()}
-        onChange={handleDateChange}
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 16px',
+        zIndex: 1001,
+        // 기존과 동일하게: 바깥 클릭이 기능에 영향 없도록 이벤트는 통과
+        pointerEvents: 'none',
+        background: 'rgba(0, 0, 0, 0.10)',
+        backdropFilter: 'blur(4px)',
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="momoModal"
         style={{
-          width: '90%',
-          height: '100px',
-          padding: '30px',
-          fontSize: '30px',
-          borderRadius: '8px',
-          border: '1px solid #ccc',
-          boxSizing: 'border-box',
-          textAlign: 'center',
-          cursor: 'pointer',
-          backgroundColor: 'white'
+          width: 'min(540px, 88vw)',
+          maxHeight: 'min(540px, 80vh)',
+          background: 'rgba(255, 255, 255, 0.94)',
+          border: '1px solid rgba(255, 255, 255, 0.95)',
+          borderRadius: '24px',
+          boxShadow: '0 18px 50px rgba(0,0,0,0.22)',
+          padding: '38px 34px 34px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          gap: '18px',
+          pointerEvents: 'auto',
+          fontFamily:
+            "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif",
         }}
-      />
-      <button onClick={handleSubmit} style={{
-        padding: '12px 25px',
-        fontSize: '18px',
-        cursor: 'pointer',
-        background: '#007bff',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        alignSelf: 'center',
-      }}>
-        확인
-      </button>
+      >
+        <div
+          style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+              gap: '18px',
+            marginBottom: '8px',
+          }}
+        >
+          <div
+            style={{
+              width: '56px',
+              height: '6px',
+              borderRadius: '999px',
+                marginTop: '-10px',
+                marginBottom: '8px',
+                background: 'linear-gradient(90deg, rgba(255, 229, 122, 0.95), rgba(255, 200, 61, 0.95))',
+                boxShadow: '0 10px 22px rgba(255, 200, 61, 0.20)',
+            }}
+          />
+          <h2
+            style={{
+              textAlign: 'center',
+                margin: 3,
+              fontSize: '30px',
+                fontWeight: 500,
+              letterSpacing: '-0.02em',
+              color: '#1f2937',
+              lineHeight: 1.25,
+            }}
+          >
+            오늘 너의 감정은 어땠어?
+          </h2>
+        </div>
+
+        <input
+          className="momoDate"
+          type="date"
+          value={currentText || getDefaultDate()}
+          onChange={handleDateChange}
+          style={{
+            width: '100%',
+            height: '96px',
+            padding: '20px 18px',
+            fontSize: '32px',
+            fontWeight: 500,
+            borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.95)',
+            boxSizing: 'border-box',
+            textAlign: 'center',
+            cursor: 'pointer',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff7f9 100%)',
+            color: '#111827',
+            boxShadow: '0 10px 26px rgba(17, 24, 39, 0.08)',
+          }}
+        />
+
+        {/* 버튼을 아래로 내려 컨텐츠 분리감 주기 */}
+        <div style={{ flex: 1, minHeight: '18px' }} />
+
+        <button
+          className="momoBtn"
+          onClick={handleSubmit}
+          style={{
+            width: 'min(260px, 100%)',
+            padding: '16px 22px',
+            fontSize: '20px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            background: 'linear-gradient(180deg, #FFE57A 0%, #FFC83D 100%)',
+            color: '#111827',
+            border: '1px solid rgba(17, 24, 39, 0.12)',
+            borderRadius: '18px',
+            alignSelf: 'center',
+            boxShadow: '0 12px 26px rgba(17, 24, 39, 0.14)',
+            transition: 'transform 0.12s ease, box-shadow 0.12s ease',
+            marginTop: '12px',
+          }}
+        >
+          확인
+        </button>
+
+        <style jsx>{`
+          .momoModal {
+            animation: momoPop 180ms ease-out;
+          }
+          .momoBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(17, 24, 39, 0.18);
+          }
+          .momoBtn:active {
+            transform: translateY(0px);
+          }
+          .momoDate:focus,
+          .momoBtn:focus {
+            outline: none;
+          }
+          .momoDate:focus-visible,
+          .momoBtn:focus-visible {
+            box-shadow: 0 0 0 4px rgba(255, 200, 61, 0.35), 0 12px 26px rgba(17, 24, 39, 0.08);
+          }
+          @keyframes momoPop {
+            from {
+              opacity: 0;
+              transform: translateY(6px) scale(0.98);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+        `}</style>
+      </div>
     </div>
   );
 };
