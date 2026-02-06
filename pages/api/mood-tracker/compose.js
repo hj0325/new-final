@@ -68,47 +68,60 @@ function buildContext(payload) {
 function computeToneHint(ctx) {
   const l = ctx.weights.left;
   const r = ctx.weights.right;
-  if (l === r) return '기쁨과 조심스러움이 비슷하게 섞인 편';
-  if (l > r) return '밝은 마음이 더 무거운 편';
-  return '조심스러운 마음이 더 무거운 편';
+
+  if (l === r) {
+    return '기쁨과 조심스러움이 살짝 섞인 날';
+  }
+
+  if (l > r) {
+    // 왼쪽(기쁜/밝은 마음)이 더 내려간 상태
+    return '기쁜 마음이 조금 더 내려간 날';
+  }
+
+  // 오른쪽(조심스러운 마음)이 더 내려간 상태
+  return '조심스러운 마음이 조금 더 내려간 날';
 }
 
 function fallbackSentence(mode, payload) {
   const ctx = buildContext(payload);
   const l = ctx.weights.left;
   const r = ctx.weights.right;
+
   const toneSentence =
     l === r
-      ? '마음이 두 가지로 살짝 섞였구나'
+      ? '기쁨과 조심스러움이 살짝 섞인 하루였어'
       : l > r
-        ? '반짝이는 기분이 더 큰 오늘이구나'
-        : '조심스러운 마음이 더 큰 오늘이구나';
+        ? '반짝이는 기분이 조금 더 많았던 하루였어'
+        : '조심스러운 마음이 조금 더 많았던 하루였어';
 
   if (mode === 'shape') {
     const s = (payload && payload.shapeInfo) || {};
-    const shapeName = s && s.name ? String(s.name) : '도형';
-    // 실패 시에도 어색하지 않게: 키워드 원문을 문장에 그대로 끼워 넣지 않음
-    return `좋아, ${toneSentence}—${shapeName}부터 살펴보며 감정생물을 만들어보자.`;
+    const shapeName = s && s.name ? String(s.name) : '이 도형';
+
+    // 상단 안내문 느낌: 도형 + 오늘 감정을 같이 설명
+    return `${shapeName}을(를) 닮은 감정생물이, ${toneSentence} 친구로 자라나고 있어.`;
   }
 
   if (mode === 'birth') {
     const s = (payload && payload.shapeInfo) || {};
     const shapeName = s && s.name ? String(s.name) : '도형';
-    return `오늘의 감정생물은 ${shapeName}처럼 ${toneSentence} 나날을 보냈어.`;
+
+    // 탄생 모달: 감정생물의 성격을 한 문장으로 정의
+    return `오늘의 감정생물은 ${shapeName}을(를) 닮은, ${toneSentence} 친구야.`;
   }
 
-  return `좋아, ${toneSentence}—오늘의 감정생물을 함께 만들어보자.`;
+  // 기본 fallback: 오늘 만들 친구에 대한 안내
+  return `${toneSentence} 감정생물을 오늘 함께 만들어보자.`;
 }
 
 function buildSystemPrompt(mode) {
   if (mode === 'shape') {
     return [
       '너는 아이를 다정하게 도와주는 동화 속 도우미야.',
-      '사용자가 고른 감정 이모티콘/키워드/무게(저울)를 참고해서, 아이가 만들 "감정생물"의 성격을 한 문장으로 말해줘.',
-      '또한 도형의 성격을 읽은 뒤 도우미가 답장하듯, 그 도형을 어떻게 느끼는지 덧붙여 자연스럽게 말해줘.',
-      '키워드가 "~했어/놀았어/넘어졌어" 같은 구어체라도, 문장을 더 자연스럽게 고쳐서 사용해.',
-      '규칙: 한국어, 따뜻하고 동화 같은 말투, 1문장만, 너무 길지 않게(약 20~44자), 이모지/따옴표/번호/줄바꿈 금지.',
-      '반드시 JSON으로만 출력해: {"text":"..."}',
+      '출력 문장은 "감정생물"이 자신을 소개하는 말이야. 감정생물이 "나"라고 말하며, 오늘 기분과 선택한 도형의 성격이 얼마나 어울리는지를 아이가 이해하기 쉽게 한 문장으로 말해줘.',
+      '오늘 기분을 나열하거나 도형 성격을 그대로 설명하지 말고, 감정생물이 "나는 ~한 친구야", "오늘 나는 ~해서, 이 도형처럼 ~해"처럼 자신의 하루와 이 도형을 닮은 점을 자연스럽게 엮어줘.',
+      '키워드가 "~했어/놀았어/넘어졌어" 같은 구어체라도 문장에 녹일 때 더 자연스럽게 고쳐서 사용해.',
+      '규칙: 한국어, 따뜻하고 동화 같은 말투, 1문장만, 25~55자 내외, 이모지/따옴표/번호/줄바꿈 금지. 반드시 JSON으로만 출력해: {"text":"..."}',
     ].join('\n');
   }
 
@@ -136,13 +149,13 @@ function buildUserPrompt(mode, payload) {
   const { basePersonalityText, shapeInfo } = payload || {};
 
   const common = [
-    `- 날짜(사용자 입력): ${ctx.dateKeyword || '(없음)'}`,
-    `- 우세 이모티콘: ${ctx.dominantEmojis.join(' ') || '(없음)'}`,
-    `- 우세 키워드: ${ctx.dominantKeywords.join(', ') || '(없음)'}`,
-    `- 긍정 키워드(일부): ${ctx.positiveKeywords.slice(-5).join(', ') || '(없음)'}`,
-    `- 부정 키워드(일부): ${ctx.negativeKeywords.slice(-5).join(', ') || '(없음)'}`,
-    `- 저울 무게(왼쪽/오른쪽): ${ctx.weights.left}/${ctx.weights.right}`,
-    `- 분위기 힌트: ${computeToneHint(ctx)}`,
+    `- 오늘 날짜: ${ctx.dateKeyword || '(없음)'}`,
+    `- 오늘 마음을 잘 보여주는 이모티콘: ${ctx.dominantEmojis.join(' ') || '(없음)'}`,
+    `- 오늘 마음을 잘 보여주는 단어들: ${ctx.dominantKeywords.join(', ') || '(없음)'}`,
+    `- 기분이 가벼웠던 순간을 떠올리게 하는 단어들: ${ctx.positiveKeywords.slice(-5).join(', ') || '(없음)'}`,
+    `- 마음이 살짝 무거웠던 순간을 떠올리게 하는 단어들: ${ctx.negativeKeywords.slice(-5).join(', ') || '(없음)'}`,
+    `- 감정 저울 무게(왼쪽/오른쪽): ${ctx.weights.left}/${ctx.weights.right}`,
+    `- 오늘 마음의 분위기 한 줄 설명: ${computeToneHint(ctx)}`,
   ].join('\n');
 
   if (mode === 'shape') {
@@ -152,14 +165,14 @@ function buildUserPrompt(mode, payload) {
     const base = basePersonalityText ? String(basePersonalityText) : '';
 
     return [
-      '다음 정보를 보고 "상단 안내문" 한 문장을 써줘.',
+      '다음 정보를 보고, 감정생물이 자신을 소개하는 한 문장을 써줘.',
       '',
       common,
       `- 이미 정한 감정생물 성격(기존 한 문장): ${base || '(없음)'}`,
       `- 이번에 확인한 도형: ${shapeName || '(없음)'}`,
       `- 도형 성격 설명: ${shapeDesc || '(없음)'}`,
       '',
-      '요청: 기존 성격 문장과 도형 성격을 자연스럽게 이어, 도우미가 답장하듯 한 문장으로 말해줘.',
+      '요청: 감정생물이 "나"라고 말하며, 오늘 기분과 이 도형의 성격이 어울리는 부분을 아이가 이해하기 쉽게 한 문장으로 소개해줘. 기분 나열이나 도형 설명 그대로 쓰지 말고, 친구가 자신을 말하듯 자연스럽게.',
       '형식: {"text":"..."}',
     ].join('\n');
   }
