@@ -930,7 +930,7 @@ const CreationPage = ({
         flexDirection: 'column',
         zIndex: 10
       }}>
-        {/* 상단: 감정 생물 만들기 */}
+        {/* 상단: 도형의 성격 */}
         <div style={{
           textAlign: 'center',
           fontSize: '18px',
@@ -940,20 +940,6 @@ const CreationPage = ({
           padding: '10px',
           background: 'white', // 완전 흰색 배경
           borderRadius: '10px'
-        }}>
-          감정 생물 만들기
-        </div>
-
-        {/* 중간: 도형의 성격 */}
-        <div style={{
-          textAlign: 'center',
-          fontSize: '16px',
-          fontWeight: '600',
-          color: 'black', // 텍스트 색상을 검은색으로 변경
-          marginBottom: '15px',
-          padding: '8px',
-          background: 'white', // 완전 흰색 배경
-          borderRadius: '8px'
         }}>
           도형의 성격
         </div>
@@ -973,7 +959,7 @@ const CreationPage = ({
                 key={shapeId}
                 onClick={() => handleShapeClick(shapeId)}
                 style={{
-                  height: '120px', // 높이를 100px에서 120px로 더 증가
+                  height: '180px', // 도형 잘림 방지용 세로폭 확대
                   background: 'rgba(255, 255, 255, 0.9)',
                   borderRadius: '10px',
                   border: '2px solid rgba(255, 255, 255, 0.3)',
@@ -1006,7 +992,7 @@ const CreationPage = ({
                        rotationSpeed={0.02}
                        floatSpeed={0.05}
                        floatAmplitude={0.1}
-                       scale={[1.2, 1.2, 1.2]} // 스케일을 0.8에서 1.2로 증가
+                       scale={[0.85, 0.85, 0.85]}
                        onClick={handleShapeClick}
                        shapeId={shapeId}
                      />
