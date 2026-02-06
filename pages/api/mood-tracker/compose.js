@@ -91,6 +91,12 @@ function fallbackSentence(mode, payload) {
     return `좋아, ${toneSentence}—${shapeName}부터 살펴보며 감정생물을 만들어보자.`;
   }
 
+  if (mode === 'birth') {
+    const s = (payload && payload.shapeInfo) || {};
+    const shapeName = s && s.name ? String(s.name) : '도형';
+    return `오늘의 감정생물은 ${shapeName}처럼 ${toneSentence} 나날을 보냈어.`;
+  }
+
   return `좋아, ${toneSentence}—오늘의 감정생물을 함께 만들어보자.`;
 }
 
@@ -102,6 +108,16 @@ function buildSystemPrompt(mode) {
       '또한 도형의 성격을 읽은 뒤 도우미가 답장하듯, 그 도형을 어떻게 느끼는지 덧붙여 자연스럽게 말해줘.',
       '키워드가 "~했어/놀았어/넘어졌어" 같은 구어체라도, 문장을 더 자연스럽게 고쳐서 사용해.',
       '규칙: 한국어, 따뜻하고 동화 같은 말투, 1문장만, 너무 길지 않게(약 20~44자), 이모지/따옴표/번호/줄바꿈 금지.',
+      '반드시 JSON으로만 출력해: {"text":"..."}',
+    ].join('\n');
+  }
+
+  if (mode === 'birth') {
+    return [
+      '너는 아이를 다정하게 도와주는 동화 속 도우미야.',
+      '오늘의 감정 결과(이모티콘, 키워드, 저울, 이미 정해진 감정생물 문장)와 사용자가 선택한 도형을 바탕으로, 이 감정생물의 "성격"을 한 문장으로 정의해줘.',
+      '예: "밝은 마음으로 재밌는 하루를 보낸, 뾰족하지만 넓은 마음을 가진 친구야." 처럼 도형의 특징과 오늘의 감정을 한 문장에 녹여줘.',
+      '규칙: 한국어, 따뜻하고 동화 같은 말투, 1문장만, 20~50자 내외, 이모지/따옴표/번호/줄바꿈 금지.',
       '반드시 JSON으로만 출력해: {"text":"..."}',
     ].join('\n');
   }
@@ -144,6 +160,25 @@ function buildUserPrompt(mode, payload) {
       `- 도형 성격 설명: ${shapeDesc || '(없음)'}`,
       '',
       '요청: 기존 성격 문장과 도형 성격을 자연스럽게 이어, 도우미가 답장하듯 한 문장으로 말해줘.',
+      '형식: {"text":"..."}',
+    ].join('\n');
+  }
+
+  if (mode === 'birth') {
+    const s = shapeInfo || {};
+    const shapeName = s.name ? String(s.name) : '';
+    const shapeDesc = s.description ? String(s.description) : '';
+    const base = basePersonalityText ? String(basePersonalityText) : '';
+
+    return [
+      '다음 정보를 보고 "오늘의 감정 생물 탄생" 모달에 쓸 "캐릭터 설명" 한 문장을 써줘.',
+      '',
+      common,
+      `- 오늘 정해진 감정생물 문장: ${base || '(없음)'}`,
+      `- 선택한 도형 이름: ${shapeName || '(없음)'}`,
+      `- 도형 성격 설명: ${shapeDesc || '(없음)'}`,
+      '',
+      '요청: 오늘의 감정 결과와 도형의 성격을 한 문장으로 정의한 캐릭터 설명을 써줘. 따뜻하고 동화 같은 말투로.',
       '형식: {"text":"..."}',
     ].join('\n');
   }
@@ -243,7 +278,7 @@ export default async function handler(req, res) {
     // eslint-disable-next-line no-console
     console.warn('[mood-tracker/compose] invalid_key_format');
     const payload = req.body || {};
-    const mode = payload.mode === 'shape' ? 'shape' : 'base';
+    const mode = (payload.mode === 'shape' ? 'shape' : payload.mode === 'birth' ? 'birth' : 'base');
     return res.status(200).json({
       ok: false,
       source: 'fallback',
@@ -253,7 +288,7 @@ export default async function handler(req, res) {
   }
 
   const payload = req.body || {};
-  const mode = payload.mode === 'shape' ? 'shape' : 'base';
+  const mode = (payload.mode === 'shape' ? 'shape' : payload.mode === 'birth' ? 'birth' : 'base');
 
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
   const timeoutMs = clampNumber(process.env.OPENAI_TIMEOUT_MS, 2000, 20000, DEFAULT_TIMEOUT_MS);

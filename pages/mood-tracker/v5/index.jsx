@@ -618,6 +618,11 @@ const CreationPage = ({
   const [fallingEmojis, setFallingEmojis] = useState([]); // 떨어지는 이모티콘들
   const [topToastText, setTopToastText] = useState('');
   const [basePersonalityText, setBasePersonalityText] = useState('');
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [completeModalCharacterText, setCompleteModalCharacterText] = useState('');
+  const [completeModalLoading, setCompleteModalLoading] = useState(false);
+  const [completeModalShapeName, setCompleteModalShapeName] = useState('');
+  const [completeModalConfirmedName, setCompleteModalConfirmedName] = useState('');
 
   const fallbackTopToastText = useMemo(() => {
     // API 응답이 오기 전/실패 시에도 어색하지 않도록, 문장은 무난하게 유지
@@ -890,6 +895,43 @@ const CreationPage = ({
         Math.random() * 4 - 2  // Z: -2 ~ 2 범위
       ]
     }]);
+  };
+
+  const handleCompleteClick = async () => {
+    const dominantId = getDominantShapeId();
+    const shapeInfo = shapeInfoMap[dominantId] || { name: '도형', description: '', emoji: '😀' };
+    setIsCompleteModalOpen(true);
+    setCompleteModalShapeName('');
+    setCompleteModalConfirmedName('');
+    setCompleteModalCharacterText('');
+    setCompleteModalLoading(true);
+    try {
+      const res = await fetch('/api/mood-tracker/compose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'birth',
+          keyword,
+          basePersonalityText: basePersonalityText || topToastText || fallbackTopToastText,
+          shapeInfo,
+          dominantEmojis: getDominantEmojis(),
+          dominantKeywords,
+          positiveEmojis,
+          negativeEmojis,
+          positiveKeywords,
+          negativeKeywords,
+          leftSliderValue,
+          rightSliderValue,
+        }),
+      });
+      const data = await res.json();
+      const text = (data && data.text ? String(data.text) : '').trim();
+      setCompleteModalCharacterText(text || '오늘의 감정생물이 탄생했어.');
+    } catch (e) {
+      setCompleteModalCharacterText('오늘의 감정생물이 탄생했어.');
+    } finally {
+      setCompleteModalLoading(false);
+    }
   };
 
   const dominantShapeId = getDominantShapeId();
@@ -1244,6 +1286,173 @@ const CreationPage = ({
           </Physics>
         </Suspense>
       </Canvas>
+
+      {/* 완성 버튼 (중앙 하단, 살짝 위·흰색) */}
+      <button
+        onClick={handleCompleteClick}
+        style={{
+          position: 'absolute',
+          bottom: '64px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '14px 32px',
+          fontSize: '18px',
+          fontWeight: '700',
+          color: '#111827',
+          background: 'white',
+          border: '2px solid rgba(17, 24, 39, 0.15)',
+          borderRadius: '999px',
+          boxShadow: '0 4px 14px rgba(0, 0, 0, 0.1)',
+          cursor: 'pointer',
+          zIndex: 50,
+          transition: 'all 0.2s ease',
+        }}
+        onMouseOver={(e) => {
+          e.target.style.transform = 'translateX(-50%) scale(1.05)';
+          e.target.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.14)';
+        }}
+        onMouseOut={(e) => {
+          e.target.style.transform = 'translateX(-50%) scale(1)';
+          e.target.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.1)';
+        }}
+      >
+        완성
+      </button>
+
+      {/* 오늘의 감정 생물 탄생 모달 */}
+      {isCompleteModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+            zIndex: 3000,
+            background: 'rgba(0, 0, 0, 0.5)',
+          }}
+          onClick={() => setIsCompleteModalOpen(false)}
+        >
+          <div
+            className="momoModal"
+            style={{
+              width: 'min(480px, 90vw)',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              background: 'rgba(255, 255, 255, 0.92)',
+              border: '1px solid rgba(255, 255, 255, 0.95)',
+              borderRadius: '28px',
+              boxShadow: '0 22px 70px rgba(255, 255, 255, 0.32), 0 18px 50px rgba(0,0,0,0.22)',
+              padding: '32px 28px 28px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '20px',
+              position: 'relative',
+              pointerEvents: 'auto',
+              backdropFilter: 'blur(10px)',
+              fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#111827', textAlign: 'center' }}>
+              오늘의 감정 생물 탄생!
+            </div>
+            <div style={{
+              fontSize: '64px',
+              lineHeight: 1,
+              textAlign: 'center',
+            }}>
+              {shapeInfoMap[dominantShapeId] && shapeInfoMap[dominantShapeId].emoji
+                ? shapeInfoMap[dominantShapeId].emoji
+                : '😀'}
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'stretch',
+              gap: '10px',
+              width: '100%',
+              maxWidth: '360px',
+            }}>
+              <input
+                type="text"
+                value={completeModalShapeName}
+                onChange={(e) => setCompleteModalShapeName(e.target.value)}
+                placeholder="감정 생물 이름 지어주기"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  color: '#333',
+                  padding: '12px 16px',
+                  border: '1px solid rgba(17, 24, 39, 0.15)',
+                  borderRadius: '999px',
+                  outline: 'none',
+                  background: 'white',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setCompleteModalConfirmedName(completeModalShapeName.trim() || '이름 없음')}
+                style={{
+                  padding: '12px 20px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: 'white',
+                  background: '#5a9e6e',
+                  border: 'none',
+                  borderRadius: '999px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                완성
+              </button>
+            </div>
+            {completeModalConfirmedName && (
+              <div style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                textAlign: 'center',
+                padding: '8px 16px',
+                background: 'rgba(210, 242, 233, 0.6)',
+                borderRadius: '14px',
+              }}>
+                {completeModalConfirmedName}
+              </div>
+            )}
+            <div style={{
+              fontSize: '17px',
+              color: '#555',
+              textAlign: 'center',
+              lineHeight: '1.55',
+              padding: '0 8px',
+              minHeight: '48px',
+            }}>
+              {completeModalLoading ? '성격을 정의하고 있어요...' : completeModalCharacterText}
+            </div>
+            <button
+              onClick={() => setIsCompleteModalOpen(false)}
+              style={{
+                padding: '12px 28px',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#111827',
+                background: 'linear-gradient(180deg, #FFE57A 0%, #FFD54F 100%)',
+                border: '1px solid rgba(17, 24, 39, 0.1)',
+                borderRadius: '999px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(255, 213, 79, 0.3)',
+              }}
+            >
+              놀기
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 도형 게임창 모달 */}
       <ShapeGameModal 
