@@ -623,12 +623,32 @@ const CreationPage = ({
   const [completeModalLoading, setCompleteModalLoading] = useState(false);
   const [completeModalShapeName, setCompleteModalShapeName] = useState('');
   const [completeModalConfirmedName, setCompleteModalConfirmedName] = useState('');
+  const [isPlayConfirmModalOpen, setIsPlayConfirmModalOpen] = useState(false);
+  const [playConfirmName, setPlayConfirmName] = useState('');
+  const [playConfirmSecondsLeft, setPlayConfirmSecondsLeft] = useState(4);
 
   const fallbackTopToastText = useMemo(() => {
     // API 응답이 오기 전/실패 시에도 어색하지 않도록, 문장은 무난하게 유지
     // (키워드는 위 칩 UI에서 이미 보여주고 있으니, 문장에 억지로 조사/활용을 붙이지 않음)
     return '좋아, 오늘의 마음으로 감정생물을 함께 만들어보자.';
   }, [positiveKeywords, negativeKeywords, dominantKeywords]);
+
+  // 놀기 확인 모달: 4초 후 첫 페이지로 이동 + 초 단위 카운트다운
+  useEffect(() => {
+    if (!isPlayConfirmModalOpen) return;
+    setPlayConfirmSecondsLeft(4);
+    const interval = setInterval(() => {
+      setPlayConfirmSecondsLeft((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    const t = setTimeout(() => {
+      setIsPlayConfirmModalOpen(false);
+      onBack();
+    }, 4000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(t);
+    };
+  }, [isPlayConfirmModalOpen, onBack]);
 
   // 상단 문장: 화면 진입 시 API로 자연스럽게 생성 (실패 시 fallback)
   useEffect(() => {
@@ -1003,7 +1023,7 @@ const CreationPage = ({
                 style={{
                   height: '180px', // 도형 잘림 방지용 세로폭 확대
                   background: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '10px',
+                  borderRadius: '20px',
                   border: '2px solid rgba(255, 255, 255, 0.3)',
                   cursor: 'pointer',
                   textAlign: 'center',
@@ -1435,7 +1455,12 @@ const CreationPage = ({
               {completeModalLoading ? '성격을 정의하고 있어요...' : completeModalCharacterText}
             </div>
             <button
-              onClick={() => setIsCompleteModalOpen(false)}
+              onClick={() => {
+                const nameToShow = completeModalConfirmedName || completeModalShapeName.trim() || '감정생물';
+                setPlayConfirmName(nameToShow);
+                setIsCompleteModalOpen(false);
+                setIsPlayConfirmModalOpen(true);
+              }}
               style={{
                 padding: '12px 28px',
                 fontSize: '16px',
@@ -1450,6 +1475,46 @@ const CreationPage = ({
             >
               놀기
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 놀기 확인 모달: 이름과 함께 즐겁게 놀아보아요! → 4초 후 첫 페이지로 */}
+      {isPlayConfirmModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+            zIndex: 3100,
+            background: 'rgba(0, 0, 0, 0.45)',
+          }}
+        >
+          <div
+            style={{
+              width: 'min(400px, 90vw)',
+              padding: '32px 28px',
+              background: 'rgba(255, 255, 255, 0.96)',
+              borderRadius: '24px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+              textAlign: 'center',
+              fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
+            }}
+          >
+            <div style={{
+              fontSize: '20px',
+              fontWeight: '700',
+              color: '#111827',
+              lineHeight: '1.5',
+            }}>
+              {playConfirmName}과 함께 즐겁게 놀아보아요!
+            </div>
+            <div style={{ marginTop: '16px', fontSize: '14px', color: '#6b7280' }}>
+              {playConfirmSecondsLeft}초 후 처음 화면으로 이동해요!
+            </div>
           </div>
         </div>
       )}
