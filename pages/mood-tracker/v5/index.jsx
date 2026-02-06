@@ -1001,7 +1001,8 @@ const CreationPage = ({
           marginBottom: '20px',
           padding: '10px',
           background: 'white', // 완전 흰색 배경
-          borderRadius: '10px'
+          borderRadius: '20px',
+          overflow: 'hidden'
         }}>
           도형의 성격
         </div>
@@ -1031,7 +1032,9 @@ const CreationPage = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  position: 'relative'
+                  position: 'relative',
+                  overflow: 'hidden',
+                  isolation: 'isolate'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.background = 'rgba(255, 255, 255, 1)';
@@ -1873,6 +1876,7 @@ export default function MoodTrackerPage() {
   if (showCreationPage) {
     return (
       <>
+      <Leva hidden />
       <CreationPage
         onBack={handleBackToMain}
         keyword={userInputText || '감정'}
@@ -1901,6 +1905,7 @@ export default function MoodTrackerPage() {
   if (showLanding) {
     return (
       <>
+      <Leva hidden />
       <div style={{
         width: '100vw',
         height: '100vh',
@@ -1981,8 +1986,8 @@ export default function MoodTrackerPage() {
 
   return (
     <>
-    {/* Leva 패널 렌더 (기존 useControls들이 실제로 보이도록) */}
-    <Leva collapsed={false} />
+    {/* Leva 패널 숨김 (useControls 값은 유지) */}
+    <Leva hidden />
     <FullScreenContainer>
       {/* GameModal 블러 위에: 클릭된 하단 이모티콘만 선명하게 오버레이 */}
       {isGameModalOpen && selectedEmojiIdForGameModal && (
