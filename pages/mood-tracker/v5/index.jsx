@@ -1004,18 +1004,18 @@ const CreationPage = ({
         </div>
       </div>
       
-      {/* 뒤로 가기 버튼 */}
+      {/* 뒤로 가기 버튼 (귀여운 라운드 스타일) */}
       <button
         onClick={onBack}
         style={{
           position: 'absolute',
           top: '30px',
           left: '30px',
-          width: '50px',
-          height: '50px',
-          background: 'rgba(255, 255, 255, 0.9)',
-          border: '5px solid #B02B3A',
-          borderRadius: '50%',
+          width: '52px',
+          height: '52px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          border: '3px solid #B02B3A',
+          borderRadius: '9999px',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -1023,23 +1023,25 @@ const CreationPage = ({
           fontSize: '24px',
           color: '#B02B3A',
           fontWeight: 'bold',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          boxShadow: '0 4px 16px rgba(176, 43, 58, 0.2), 0 2px 8px rgba(0,0,0,0.08)',
           zIndex: 100,
-          transition: 'all 0.2s ease'
+          transition: 'all 0.25s ease'
         }}
         onMouseOver={(e) => {
           e.target.style.background = '#B02B3A';
           e.target.style.color = 'white';
-          e.target.style.transform = 'scale(1.1)';
+          e.target.style.transform = 'scale(1.08)';
+          e.target.style.boxShadow = '0 6px 20px rgba(176, 43, 58, 0.35), 0 4px 12px rgba(0,0,0,0.1)';
         }}
         onMouseOut={(e) => {
-          e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+          e.target.style.background = 'rgba(255, 255, 255, 0.95)';
           e.target.style.color = '#B02B3A';
           e.target.style.transform = 'scale(1)';
+          e.target.style.boxShadow = '0 4px 16px rgba(176, 43, 58, 0.2), 0 2px 8px rgba(0,0,0,0.08)';
         }}
-              >
-          ⬅
-        </button>
+      >
+        ⬅
+      </button>
       
       {/* 상단 토스트: 이모티콘/키워드 기반 문장 (항상 표시, 문장만 API로 교체) */}
       <div
@@ -1048,69 +1050,99 @@ const CreationPage = ({
           top: '30px',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: '15px',
+          background: 'rgba(255, 255, 255, 0.92)',
+          border: '1px solid rgba(255, 255, 255, 0.95)',
+          borderRadius: '26px',
           padding: '20px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          boxShadow: '0 22px 70px rgba(255, 255, 255, 0.32), 0 18px 50px rgba(0,0,0,0.22)',
           zIndex: 100,
           textAlign: 'center',
-          minWidth: '300px',
-          maxWidth: '80%',
+          width: 'min(420px, 90vw)',
           pointerEvents: 'none',
         }}
         aria-live="polite"
       >
-          {/* 우세한 이모티콘 표시 */}
+          {/* 이모지(카드 정중앙) + 말풍선(이모지 옆) */}
           <div style={{
-            fontSize: '60px',
-            marginBottom: '10px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '10px',
-            flexWrap: 'wrap'
+            position: 'relative',
+            width: '100%',
+            height: '88px',
+            marginBottom: '14px'
           }}>
-            {dominantEmojis && dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
-              <span key={index}>{emoji}</span>
-            )) : '😀'}
+            {/* 이모지: 카드 가로 중앙에 고정 */}
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '72px',
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              {dominantEmojis && dominantEmojis.length > 0 ? dominantEmojis.map((emoji, index) => (
+                <span key={index}>{emoji}</span>
+              )) : '😀'}
+            </div>
+            {/* 말풍선: 이모지 오른쪽에 배치 (중앙 + 이모지 반너비 + 간격) */}
+            <div style={{
+              position: 'absolute',
+              left: 'calc(50% + 48px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '8px 14px',
+              background: '#D2F2E9',
+              borderRadius: '20px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: '-6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 0,
+                height: 0,
+                borderRight: '8px solid #D2F2E9',
+                borderTop: '8px solid transparent',
+                borderBottom: '8px solid transparent'
+              }} />
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '6px',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {dominantKeywords && dominantKeywords.length > 0 ? (
+                  dominantKeywords.map((kw, index) => (
+                    <span key={index} style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#333'
+                    }}>
+                      {kw}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ color: '#666', fontSize: '14px' }}>
+                    감정 키워드가 없습니다
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           
-          {/* 키워드 표시 */}
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: '12px'
-          }}>
-            {dominantKeywords && dominantKeywords.length > 0 ? (
-              dominantKeywords.map((kw, index) => (
-                <span key={index} style={{
-                  padding: '5px 12px',
-                  background: '#D2F2E9',
-                  borderRadius: '15px',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  color: '#333'
-                }}>
-                  {kw}
-                </span>
-              ))
-            ) : (
-              <span style={{ color: '#666', fontSize: '14px' }}>
-                감정 키워드가 없습니다
-              </span>
-            )}
-          </div>
-          
-          {/* 한 문장 안내 */}
+          {/* 한 문장 안내 (길면 두 줄로 줄바꿈) */}
           <div style={{
             fontSize: '18px',
             color: '#555',
             textAlign: 'center',
             fontWeight: '500',
-            lineHeight: '1.4'
+            lineHeight: '1.5',
+            maxWidth: '100%',
+            wordBreak: 'keep-all',
+            overflowWrap: 'break-word'
           }}>
             {topToastText || fallbackTopToastText}
           </div>
